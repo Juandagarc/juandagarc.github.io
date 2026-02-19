@@ -1,0 +1,9 @@
+{
+  "ignore": {
+    "rules": [],
+    "files": [
+      ".next/**",
+      "node_modules/**"
+    ]
+  }
+}
