@@ -1,0 +1,13 @@
+{
+    "nav": {
+        "about": "Acerca de",
+        "projects": "Proyectos",
+        "contact": "Contacto"
+    },
+    "hero": {
+        "building": "Creando ",
+        "experiences": "experiencias ",
+        "that": "que ",
+        "last": "duren"
+    }
+}

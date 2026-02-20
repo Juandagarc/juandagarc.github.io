@@ -1,0 +1,13 @@
+{
+    "nav": {
+        "about": "About",
+        "projects": "Projects",
+        "contact": "Contact"
+    },
+    "hero": {
+        "building": "Building ",
+        "experiences": "experiences ",
+        "that": "that ",
+        "last": "last"
+    }
+}
