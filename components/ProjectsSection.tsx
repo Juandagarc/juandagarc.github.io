@@ -4,14 +4,14 @@ import { useState } from "react";
 import { useTranslation } from "./I18nProvider";
 import { px } from "../utils/px";
 
-const imgExternalLink = "/assets/external-link.png";
-const imgImage1 = "/assets/social-top.png"; // reusing github icon
-const imgMac = "/assets/mac-mockup.png";
-const imgForward = "/assets/forward-arrow.png";
-const imgBack = "/assets/back-arrow.png";
-const imgLaptopBlue = "/assets/laptop-blue.png";
-const imgTransparentIphone = "/assets/transparent-iphone.png";
-const imgPagination = "/assets/pagination.svg";
+const imgExternalLink = "./assets/external-link.png";
+const imgImage1 = "./assets/social-top.png"; // reusing github icon
+const imgMac = "./assets/mac-mockup.png";
+const imgForward = "./assets/forward-arrow.png";
+const imgBack = "./assets/back-arrow.png";
+const imgLaptopBlue = "./assets/laptop-blue.png";
+const imgTransparentIphone = "./assets/transparent-iphone.png";
+const imgPagination = "./assets/pagination.svg";
 
 // The project items content component
 const ProjectItem = ({ title, description, link, github }: { title: string, description: string, link: string, github: string }) => {

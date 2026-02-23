@@ -3,10 +3,10 @@
 import { useTranslation } from "./I18nProvider";
 import { px } from "../utils/px";
 
-const imgGlassBulbWithAiStar = "/assets/glass-bulb.png"; // bulb icon
-const imgFloatingAbstractObjectsMadeOfGlass = "/assets/floating-objects.png"; // stones
-const imgFlow = "/assets/flow-line.svg"; // the big svg line
-const imgStar = "/assets/iridescent-rhombus.png"; // it turns out the "rhombus" asset was actually the star based on coordinates
+const imgGlassBulbWithAiStar = "./assets/glass-bulb.png"; // bulb icon
+const imgFloatingAbstractObjectsMadeOfGlass = "./assets/floating-objects.png"; // stones
+const imgFlow = "./assets/flow-line.svg"; // the big svg line
+const imgStar = "./assets/iridescent-rhombus.png"; // it turns out the "rhombus" asset was actually the star based on coordinates
 
 export default function WorkExperienceSection() {
     const { t } = useTranslation();

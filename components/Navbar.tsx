@@ -3,8 +3,8 @@
 import { useTranslation } from "./I18nProvider";
 import { px } from "../utils/px";
 
-const imgEarthGlobe = "/assets/92b9b428999016f1c32488d030aef3a460492980.png";
-const imgLogo = "/assets/105a200fc672a2ad41d145328a723eeb0564bbc1.svg";
+const imgEarthGlobe = "./assets/92b9b428999016f1c32488d030aef3a460492980.png";
+const imgLogo = "./assets/105a200fc672a2ad41d145328a723eeb0564bbc1.svg";
 
 export default function Navbar() {
     const { t, language, setLanguage } = useTranslation();

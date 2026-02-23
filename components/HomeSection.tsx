@@ -3,10 +3,10 @@
 import { useTranslation } from "./I18nProvider";
 import { px } from "../utils/px";
 
-const imgMegaphone = "/assets/868b5bbaedc840a029791784ced86b2892ddea54.png";
-const imgShapes = "/assets/e52db3117dd722c709f957c8c46d77bc91992ff3.png";
-const imgDoubleDown = "/assets/6b67e94644a008c44eb8be2a796f9a04f64046af.png";
-const imgLines = "/assets/617a64f8be69ee9564acd32aa96143ca34cdfeeb.svg";
+const imgMegaphone = "./assets/868b5bbaedc840a029791784ced86b2892ddea54.png";
+const imgShapes = "./assets/e52db3117dd722c709f957c8c46d77bc91992ff3.png";
+const imgDoubleDown = "./assets/6b67e94644a008c44eb8be2a796f9a04f64046af.png";
+const imgLines = "./assets/617a64f8be69ee9564acd32aa96143ca34cdfeeb.svg";
 
 export default function HomeSection() {
     const { t, language } = useTranslation();
