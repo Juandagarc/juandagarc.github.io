@@ -6,7 +6,7 @@ import { px } from "../utils/px";
 
 const imgExternalLink = "./assets/external-link.png";
 const imgImage1 = "./assets/social-top.png"; // reusing github icon
-const imgMac = "./assets/mac-mockup.png";
+const imgMac = "./assets/mac-mockup.webp";
 const imgForward = "./assets/forward-arrow.png";
 const imgBack = "./assets/back-arrow.png";
 const imgLaptopBlue = "./assets/laptop-blue.png";

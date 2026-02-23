@@ -3,7 +3,7 @@
 import { useTranslation } from "./I18nProvider";
 import { px } from "../utils/px";
 
-const imgDevImage = "./assets/dev_image.png";
+const imgDevImage = "./assets/dev_image.webp";
 const imgBusinessStrategy = "./assets/business-strategy.png";
 const imgAbstractGlass = "./assets/abstract-glass.png";
 const imgImage1 = "./assets/social-top.png";
