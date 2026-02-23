@@ -9,5 +9,50 @@
         "experiences": "experiences ",
         "that": "that ",
         "last": "last"
+    },
+    "about": {
+        "title": "About",
+        "description": "I'm Juan David, a systems engineer candidate with a great passion for a variety of interests. I love playing the piano, hip hop and learning languages.\n\nFrom an early age, I have been fascinated by backend development across multiple technologies. I spend much of my free time learning and experimenting with new tools and programming languages, always looking for ways to improve and expand my knowledge.\n\nOne of my biggest dreams is to create my own mobile app, one that has the power to help others and make a positive difference in their lives. I firmly believe in the potential of technology to transform society and I am committed to contributing to this change through my skills and knowledge."
+    },
+    "projects": {
+        "title": "Personal Projects",
+        "item_title": "Project title",
+        "item_desc": "A short project description\nfor simplify."
+    },
+    "work": {
+        "title1": "work",
+        "title2": "experience",
+        "jobs": [
+            {
+                "title": "Wordpress developer",
+                "duration": "1 year"
+            },
+            {
+                "title": "Laravel + Vue.js developer",
+                "duration": "1 year"
+            },
+            {
+                "title": "Next.js + NestJS Developer",
+                "duration": "7 months"
+            },
+            {
+                "title": "Full stack freelancer",
+                "duration": "6 months"
+            }
+        ],
+        "milestones": [
+            {
+                "title": "University Technological of Pereira (UTP)",
+                "year": "2023"
+            },
+            {
+                "title": "INSA Toulouse Exchange (France)",
+                "year": "2025"
+            },
+            {
+                "title": "UTP Graduation",
+                "year": "-2028-"
+            }
+        ]
     }
 }

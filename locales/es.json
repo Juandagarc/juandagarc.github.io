@@ -9,5 +9,50 @@
         "experiences": "experiencias ",
         "that": "que ",
         "last": "duren"
+    },
+    "about": {
+        "title": "Sobre mí",
+        "description": "Soy Juan David, un candidato a ingeniero de sistemas con una gran pasión por una variedad de intereses. Me encanta tocar el piano, el hip hop y aprender idiomas.\n\nDesde temprana edad, me ha fascinado el desarrollo backend en múltiples tecnologías. Paso gran parte de mi tiempo libre aprendiendo y experimentando con nuevas herramientas y lenguajes de programación, siempre buscando formas de mejorar y ampliar mis conocimientos.\n\nUno de mis mayores sueños es crear mi propia aplicación móvil, una que tenga el poder de ayudar a otros y marcar una diferencia positiva en sus vidas. Creo firmemente en el potencial de la tecnología para transformar la sociedad y estoy comprometido a contribuir a este cambio a través de mis habilidades y conocimientos."
+    },
+    "projects": {
+        "title": "Proyectos Personales",
+        "item_title": "Título del proyecto",
+        "item_desc": "Una breve descripción del proyecto\npara simplificar."
+    },
+    "work": {
+        "title1": "experiencia",
+        "title2": "laboral",
+        "jobs": [
+            {
+                "title": "Desarrollador Wordpress",
+                "duration": "1 año"
+            },
+            {
+                "title": "Desarrollador Laravel + Vue.js",
+                "duration": "1 año"
+            },
+            {
+                "title": "Desarrollador Next.js + NestJS",
+                "duration": "7 meses"
+            },
+            {
+                "title": "Freelancer Full stack",
+                "duration": "6 meses"
+            }
+        ],
+        "milestones": [
+            {
+                "title": "Universidad Tecnológica de Pereira (UTP)",
+                "year": "2023"
+            },
+            {
+                "title": "Intercambio INSA Toulouse (Francia)",
+                "year": "2025"
+            },
+            {
+                "title": "Graduación UTP",
+                "year": "-2028-"
+            }
+        ]
     }
 }
