@@ -100,12 +100,12 @@ export default function AboutSection() {
                         </div>
 
                         {/* DNA Glass - Figma coords: x=1403, y=0. Relative: left=781, top=0 */}
-                        <div style={{ position: "absolute", left: px(781), top: px(0), width: px(232), height: px(254), zIndex: -1 }}>
+                        <div style={{ position: "absolute", left: px(781), top: px(0), width: px(232), height: px(254), zIndex: 30 }}>
                             <Image src={imgAbstractGlass} alt="" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" style={{ objectFit: "contain", pointerEvents: "none" }} />
                         </div>
 
                         {/* Description Card and Social Links */}
-                        <div style={{ position: "absolute", left: px(18), top: px(225), display: "flex", flexDirection: "column", gap: px(40), zIndex: 10 }}>
+                        <div style={{ position: "absolute", left: px(18), top: px(225), display: "flex", flexDirection: "column", gap: px(40), zIndex: 20 }}>
                             <div
                                 style={{
                                     fontFamily: "'Plus Jakarta Sans', sans-serif",
