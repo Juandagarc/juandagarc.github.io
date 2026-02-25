@@ -19,6 +19,23 @@
         "item_title": "Título del proyecto",
         "item_desc": "Una breve descripción del proyecto\npara simplificar."
     },
+    "contact": {
+        "title1": "Trabajemos",
+        "title2": "Juntos",
+        "subtitle": "Siempre estoy abierto a discutir trabajos de diseño de productos u oportunidades de asociación.",
+        "name": "Tu Nombre",
+        "email": "Tu Correo Electrónico",
+        "subject": "Asunto",
+        "message": "Mensaje",
+        "submit": "Enviar Mensaje",
+        "submitting": "Enviando...",
+        "success": "¡Mensaje Enviado!",
+        "socialText": "También puedes encontrarme en mis redes sociales:",
+        "placeholderName": "Juan Pérez",
+        "placeholderEmail": "juan@ejemplo.com",
+        "placeholderSubject": "¿Cómo puedo ayudarte?",
+        "placeholderMessage": "Háblame de tu proyecto..."
+    },
     "work": {
         "title1": "experiencia",
         "title2": "laboral",

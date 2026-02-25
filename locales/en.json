@@ -19,6 +19,23 @@
         "item_title": "Project title",
         "item_desc": "A short project description\nfor simplify."
     },
+    "contact": {
+        "title1": "Let's",
+        "title2": "Connect",
+        "subtitle": "I'm always open to discussing product design work or partnership opportunities.",
+        "name": "Your Name",
+        "email": "Your Email",
+        "subject": "Subject",
+        "message": "Message",
+        "submit": "Send Message",
+        "submitting": "Sending...",
+        "success": "Message Sent!",
+        "socialText": "You can also find me on my social networks:",
+        "placeholderName": "John Doe",
+        "placeholderEmail": "john@example.com",
+        "placeholderSubject": "How can I help you?",
+        "placeholderMessage": "Tell me about your project..."
+    },
     "work": {
         "title1": "work",
         "title2": "experience",
