@@ -2,6 +2,7 @@
 
 import { useTranslation } from "./I18nProvider";
 import { px } from "../utils/px";
+import { motion, useScroll, useTransform } from "framer-motion";
 
 const imgMegaphone = "./assets/868b5bbaedc840a029791784ced86b2892ddea54.png";
 const imgShapes = "./assets/e52db3117dd722c709f957c8c46d77bc91992ff3.png";
@@ -10,6 +11,12 @@ const imgLines = "./assets/617a64f8be69ee9564acd32aa96143ca34cdfeeb.svg";
 
 export default function HomeSection() {
     const { t, language } = useTranslation();
+    const { scrollY } = useScroll();
+
+    // Parallax values
+    const yHero = useTransform(scrollY, [0, 1000], [0, 200]);
+    const yMegaphone = useTransform(scrollY, [0, 1000], [0, -150]);
+    const yShapes = useTransform(scrollY, [0, 1000], [0, 150]);
 
     return (
         <div
@@ -21,8 +28,12 @@ export default function HomeSection() {
             }}
         >
             {/* ── HERO TEXT: x:378 y:318 w:971 h:480 ── */}
-            <div
+            <motion.div
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
                 style={{
+                    y: yHero,
                     position: "absolute",
                     left: px(378),
                     top: px(318),
@@ -42,7 +53,7 @@ export default function HomeSection() {
                     <span>{t("hero.that")}</span>
                     <span style={{ color: "#07cf07" }}>{t("hero.last")}</span>
                 </div>
-            </div>
+            </motion.div>
 
             {/* ── LINES DECORATION: x:1006 y:425 w:274 h:10 ── */}
             <div
@@ -61,8 +72,9 @@ export default function HomeSection() {
             </div>
 
             {/* ── MEGAPHONE: x:242 y:254 w:246 h:152 ── */}
-            <div
+            <motion.div
                 style={{
+                    y: yMegaphone,
                     position: "absolute",
                     left: px(242),
                     top: px(254),
@@ -75,11 +87,12 @@ export default function HomeSection() {
                     alt=""
                     style={{ width: "100%", height: "100%", objectFit: "contain", pointerEvents: "none" }}
                 />
-            </div>
+            </motion.div>
 
             {/* ── ABSTRACT SHAPES: x:976 y:627 w:354 h:374 ── */}
-            <div
+            <motion.div
                 style={{
+                    y: yShapes,
                     position: "absolute",
                     left: px(976),
                     top: px(627),
@@ -92,10 +105,13 @@ export default function HomeSection() {
                     alt=""
                     style={{ width: "100%", height: "100%", objectFit: "contain", pointerEvents: "none" }}
                 />
-            </div>
+            </motion.div>
 
             {/* ── DOUBLE DOWN: x:847 y:981 w:33 h:32 ── */}
-            <div
+            <motion.div
+                initial={{ y: 0 }}
+                animate={{ y: [0, 10, 0] }}
+                transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
                 onClick={() => {
                     const el = document.getElementById("about");
                     if (el) el.scrollIntoView({ behavior: "smooth" });
@@ -114,7 +130,7 @@ export default function HomeSection() {
                     alt=""
                     style={{ width: "100%", height: "100%", objectFit: "contain", pointerEvents: "none" }}
                 />
-            </div>
+            </motion.div>
         </div>
     );
 }

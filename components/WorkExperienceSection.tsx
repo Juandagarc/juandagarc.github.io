@@ -1,7 +1,8 @@
 "use client";
-
+import { useRef } from "react";
 import { useTranslation } from "./I18nProvider";
 import { px } from "../utils/px";
+import { motion, useScroll, useTransform } from "framer-motion";
 
 const imgGlassBulbWithAiStar = "./assets/glass-bulb.png"; // bulb icon
 const imgFloatingAbstractObjectsMadeOfGlass = "./assets/floating-objects.png"; // stones
@@ -9,14 +10,25 @@ const imgFlow = "./assets/flow-line.svg"; // the big svg line
 const imgStar = "./assets/iridescent-rhombus.png"; // it turns out the "rhombus" asset was actually the star based on coordinates
 
 export default function WorkExperienceSection() {
-    const { t } = useTranslation();
+    const { t, language } = useTranslation();
+    const ref = useRef<HTMLDivElement>(null);
+    const { scrollYProgress } = useScroll({
+        target: ref,
+        offset: ["start end", "end start"]
+    });
 
-    const jobs: any[] = t("work.jobs") as any;
-    const milestones: any[] = t("work.milestones") as any;
+    // Parallax mapped to hit 0 exactly when section is centered
+    const yBulb = useTransform(scrollYProgress, [0, 0.5, 1], [-150, 0, 150]);
+    const yStar = useTransform(scrollYProgress, [0, 0.5, 1], [100, 0, -100]);
+    const yStones = useTransform(scrollYProgress, [0, 0.5, 1], [150, 0, -150]);
+
+    const jobs: unknown = t("work.jobs");
+    const milestones: unknown = t("work.milestones");
 
     return (
         <div
             id="work"
+            ref={ref}
             style={{
                 width: "100vw",
                 height: px(1117), // 64.64vw
@@ -26,41 +38,53 @@ export default function WorkExperienceSection() {
             }}
         >
             {/* Title */}
-            <div
+            <motion.div
+                initial={{ opacity: 0, x: 50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
                 style={{
                     position: "absolute",
                     top: px(319),
-                    left: px(1039),
-                    width: px(459),
+                    left: language === "es" ? px(900) : px(1039),
+                    width: language === "es" ? px(900) : px(459),
                     height: px(480),
                     display: "flex",
                     flexDirection: "column",
+                    justifyContent: language === "es" ? "center" : "flex-start",
                     fontFamily: "'Plus Jakarta Sans', sans-serif",
                     fontWeight: 800,
-                    fontSize: px(150),
-                    lineHeight: px(160),
+                    fontSize: language === "es" ? px(105) : px(150),
+                    lineHeight: language === "es" ? px(115) : px(160),
                 }}
             >
-                <div style={{ color: "#ffae00", lineHeight: px(160) }}>{t("work.title1")}</div>
-                {/* The "experience" text breaks onto two lines because of the width, mimicking the exact design */}
-                <div style={{ color: "white", lineHeight: px(160), marginTop: px(-10), wordBreak: "break-all" }}>exper</div>
-                <div style={{ color: "white", lineHeight: px(160), marginTop: px(-10), wordBreak: "break-all" }}>ience</div>
-            </div>
+                <div style={{ color: "#ffae00", lineHeight: language === "es" ? px(115) : px(160) }}>{t("work.title1")}</div>
+                {language === "es" ? (
+                    <div style={{ color: "white", lineHeight: px(115), marginTop: px(-10) }}>
+                        {t("work.title2")}
+                    </div>
+                ) : (
+                    <>
+                        <div style={{ color: "white", lineHeight: px(160), marginTop: px(-10), wordBreak: "break-all" }}>exper</div>
+                        <div style={{ color: "white", lineHeight: px(160), marginTop: px(-10), wordBreak: "break-all" }}>ience</div>
+                    </>
+                )}
+            </motion.div>
 
             {/* Floating Icons near title */}
             {/* Figma absolute coords relative to section: Bulb(998, 393), Star(1389, 651) */}
-            <div style={{ position: "absolute", left: px(998), top: px(393), width: px(63), height: px(77), transform: "rotate(-70.43deg)", zIndex: 10 }}>
+            <motion.div style={{ position: "absolute", left: language === "es" ? px(850) : px(998), top: language === "es" ? px(400) : px(393), width: px(63), height: px(77), transform: "rotate(-70.43deg)", zIndex: 10, y: yBulb }}>
                 <img src={imgGlassBulbWithAiStar} alt="" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
-            </div>
+            </motion.div>
 
-            <div style={{ position: "absolute", left: px(1398), top: px(651), width: px(85), height: px(75), transform: "rotate(21.83deg)", zIndex: 10 }}>
+            <motion.div style={{ position: "absolute", left: language === "es" ? px(1250) : px(1398), top: language === "es" ? px(650) : px(651), width: px(85), height: px(75), transform: "rotate(21.83deg)", zIndex: 10, y: yStar }}>
                 <img src={imgStar} alt="" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
-            </div>
+            </motion.div>
 
             {/* Floating abstract objects (stones) */}
-            <div style={{ position: "absolute", left: px(1431), top: px(757), width: px(297), height: px(372) }}>
+            <motion.div style={{ position: "absolute", left: px(1431), top: px(757), width: px(297), height: px(372), y: yStones }}>
                 <img src={imgFloatingAbstractObjectsMadeOfGlass} alt="" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
-            </div>
+            </motion.div>
 
             {/* Flow SVG line connecting everything */}
             <div style={{ position: "absolute", left: px(277.5), top: px(154), width: px(421), height: px(810), zIndex: 10, pointerEvents: "none" }}>
@@ -71,8 +95,15 @@ export default function WorkExperienceSection() {
 
             {/* Milestones (Left side) */}
             <div style={{ position: "absolute", left: px(109), top: px(238), display: "flex", flexDirection: "column", gap: px(108) }}>
-                {Array.isArray(milestones) && milestones.map((ms, idx) => (
-                    <div key={idx} style={{ position: "relative", width: px(309), height: px(142) }}>
+                {Array.isArray(milestones) && milestones.map((ms: { title?: string, year?: string }, idx) => (
+                    <motion.div
+                        initial={{ opacity: 0, x: -50 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true, margin: "-50px" }}
+                        transition={{ duration: 0.5, delay: idx * 0.2 }}
+                        key={idx}
+                        style={{ position: "relative", width: px(309), height: px(142) }}
+                    >
                         <div style={{
                             position: "absolute",
                             left: px(30),
@@ -117,14 +148,21 @@ export default function WorkExperienceSection() {
                                 {ms.year}
                             </div>
                         </div>
-                    </div>
+                    </motion.div>
                 ))}
             </div>
 
             {/* Jobs (Right side) */}
             <div style={{ position: "absolute", left: px(525), top: px(289), display: "flex", flexDirection: "column", gap: px(14) }}>
-                {Array.isArray(jobs) && jobs.map((job, idx) => (
-                    <div key={idx} style={{ position: "relative", width: px(312), height: px(142) }}>
+                {Array.isArray(jobs) && jobs.map((job: { title?: string, duration?: string }, idx) => (
+                    <motion.div
+                        initial={{ opacity: 0, x: 50 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true, margin: "-50px" }}
+                        transition={{ duration: 0.5, delay: idx * 0.15 }}
+                        key={idx}
+                        style={{ position: "relative", width: px(312), height: px(142) }}
+                    >
                         <div style={{
                             position: "absolute",
                             left: 0,
@@ -170,7 +208,7 @@ export default function WorkExperienceSection() {
                                 {job.duration}
                             </div>
                         </div>
-                    </div>
+                    </motion.div>
                 ))}
             </div>
         </div>

@@ -2,14 +2,21 @@
 
 import { useTranslation } from "./I18nProvider";
 import { px } from "../utils/px";
+import { usePathname, useRouter } from "next/navigation";
 
 const imgEarthGlobe = "./assets/92b9b428999016f1c32488d030aef3a460492980.png";
 const imgLogo = "./assets/105a200fc672a2ad41d145328a723eeb0564bbc1.svg";
 
 export default function Navbar() {
     const { t, language, setLanguage } = useTranslation();
+    const pathname = usePathname();
+    const router = useRouter();
 
     const handleScroll = (id: string) => {
+        if (pathname !== "/") {
+            router.push(`/#${id}`);
+            return;
+        }
         const element = document.getElementById(id);
         if (element) {
             element.scrollIntoView({ behavior: "smooth" });
@@ -96,12 +103,12 @@ export default function Navbar() {
                 >
                     {t("work.title1")}
                 </p>
-                <p
-                    style={{ margin: 0, fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 500, fontSize: px(24), lineHeight: "normal", color: "#fff", whiteSpace: "nowrap", cursor: "pointer" }}
-                    onClick={() => handleScroll("contact")}
+                <a
+                    href="/contact"
+                    style={{ margin: 0, fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 500, fontSize: px(24), lineHeight: "normal", color: "#fff", whiteSpace: "nowrap", cursor: "pointer", textDecoration: "none" }}
                 >
                     {t("nav.contact")}
-                </p>
+                </a>
 
                 <button
                     onClick={() => setLanguage(language === "en" ? "es" : "en")}

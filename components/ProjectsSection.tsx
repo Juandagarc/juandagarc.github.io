@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useTranslation } from "./I18nProvider";
 import { px } from "../utils/px";
+import { motion, useScroll, useTransform } from "framer-motion";
 
 const imgExternalLink = "./assets/external-link.png";
 const imgImage1 = "./assets/social-top.png"; // reusing github icon
@@ -26,22 +27,32 @@ const ProjectItem = ({ title, description, link, github }: { title: string, desc
                     <img src={imgMac} alt="" style={{ width: "120%", height: "135%", position: "absolute", left: "-10%", top: "-15%", objectFit: "contain" }} />
                 </div>
 
-                <div style={{ position: "absolute", top: px(318), left: px(26), right: px(26), textAlign: "left", color: "black", fontWeight: 700, fontSize: px(30), fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                    {title}
-                </div>
+                <div style={{
+                    position: "absolute",
+                    top: px(290),
+                    left: px(26),
+                    right: px(26),
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: px(12)
+                }}>
+                    <div style={{ textAlign: "left", color: "black", fontWeight: 700, fontSize: px(30), fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                        {title}
+                    </div>
 
-                <div style={{ position: "absolute", top: px(364), left: px(26), right: px(26), textAlign: "left", color: "black", fontWeight: 500, fontSize: px(24.355), fontFamily: "'Plus Jakarta Sans', sans-serif", whiteSpace: "pre-wrap" }}>
-                    {description}
-                </div>
+                    <div style={{ textAlign: "left", color: "black", fontWeight: 500, fontSize: px(24.355), fontFamily: "'Plus Jakarta Sans', sans-serif", whiteSpace: "pre-wrap" }}>
+                        {description}
+                    </div>
 
-                {/* Buttons bottom */}
-                <div style={{ position: "absolute", top: px(456), left: px(35), display: "flex", gap: px(25) }}>
-                    <a href={link} target="_blank" rel="noreferrer" style={{ backgroundColor: "#5990ff", width: px(145), height: px(56), borderRadius: px(10), display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
-                        <img src={imgExternalLink} alt="" style={{ width: px(48), height: px(48), objectFit: "contain" }} />
-                    </a>
-                    <a href={github} target="_blank" rel="noreferrer" style={{ backgroundColor: "#1e1e1e", width: px(145), height: px(56), borderRadius: px(10), display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
-                        <img src={imgImage1} alt="" style={{ width: px(48), height: px(48), objectFit: "cover" }} />
-                    </a>
+                    {/* Buttons bottom */}
+                    <div style={{ display: "flex", gap: px(25), marginTop: px(8) }}>
+                        <a href={link} target="_blank" rel="noreferrer" style={{ backgroundColor: "#5990ff", width: px(145), height: px(56), borderRadius: px(10), display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+                            <img src={imgExternalLink} alt="" style={{ width: px(48), height: px(48), objectFit: "contain" }} />
+                        </a>
+                        <a href={github} target="_blank" rel="noreferrer" style={{ backgroundColor: "#1e1e1e", width: px(145), height: px(56), borderRadius: px(10), display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+                            <img src={imgImage1} alt="" style={{ width: px(48), height: px(48), objectFit: "cover" }} />
+                        </a>
+                    </div>
                 </div>
             </div>
 
@@ -60,6 +71,15 @@ const ProjectItem = ({ title, description, link, github }: { title: string, desc
 
 export default function ProjectsSection() {
     const { t } = useTranslation();
+    const ref = useRef<HTMLDivElement>(null);
+    const { scrollYProgress } = useScroll({
+        target: ref,
+        offset: ["start end", "end start"]
+    });
+
+    // Parallax mapped to hit 0 exactly when section is centered
+    const yLaptop = useTransform(scrollYProgress, [0, 0.5, 1], [150, 0, -150]);
+    const yIphone = useTransform(scrollYProgress, [0, 0.5, 1], [-100, 0, 100]);
 
     // Create dummy projects array just to show sliding functionality.
     // In a real app, this would be fueled by locales or props.
@@ -84,16 +104,21 @@ export default function ProjectsSection() {
     return (
         <div
             id="projects"
+            ref={ref}
             style={{
                 width: "100vw",
-                height: px(1117), // 64.64vw
+                height: px(1250), // Increased height for spacing
                 position: "relative",
                 backgroundColor: "#0d0d0d",
                 overflow: "hidden", // Keep overflow hidden for carousel
             }}
         >
             {/* Title */}
-            <div
+            <motion.div
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
                 style={{
                     position: "absolute",
                     top: px(160),
@@ -112,18 +137,24 @@ export default function ProjectsSection() {
                 {t("projects.title").split(" ").length > 1 && (
                     <span style={{ color: "#07cf07" }}>{t("projects.title").split(" ").slice(1).join(" ")}</span>
                 )}
-            </div>
+            </motion.div>
 
             {/* Content wrapper */}
-            <div style={{ position: "absolute", top: px(323), left: 0, right: 0, display: "flex", justifyContent: "center" }}>
+            <motion.div
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+                style={{ position: "absolute", top: px(450), left: 0, right: 0, display: "flex", justifyContent: "center" }}
+            >
 
                 {/* Carousel items viewport */}
-                <div style={{ overflow: "hidden", width: px(1355) }}>
+                <div style={{ overflow: "hidden", width: px(1365) }}>
                     <div style={{
                         display: "flex",
-                        gap: px(100),
+                        gap: px(105),
                         width: "max-content",
-                        transform: `translateX(calc(-${currentIndex} * (${px(385)} + ${px(100)})))`,
+                        transform: `translateX(calc(-${currentIndex} * (${px(385)} + ${px(105)})))`,
                         transition: "transform 0.4s ease-in-out"
                     }}>
                         {projectsData.map((project) => (
@@ -140,20 +171,33 @@ export default function ProjectsSection() {
                     <img src={imgForward} alt="" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
                 </div>
 
-                {/* Pagination indicator */}
-                <div style={{ position: "absolute", top: px(587), left: "50%", transform: "translateX(-50%)", width: px(217), height: px(13), zIndex: 1 }}>
-                    <img src={imgPagination} alt="" style={{ width: "100%", height: "100%" }} />
+                {/* Pagination indicators */}
+                <div style={{ position: "absolute", top: px(600), left: "50%", transform: "translateX(-50%)", display: "flex", gap: px(12), zIndex: 1 }}>
+                    {projectsData.slice(0, projectsData.length - 2).map((_, idx) => (
+                        <div
+                            key={idx}
+                            onClick={() => setCurrentIndex(idx)}
+                            style={{
+                                width: currentIndex === idx ? px(40) : px(13),
+                                height: px(13),
+                                borderRadius: px(13),
+                                backgroundColor: currentIndex === idx ? "#07cf07" : "#333",
+                                cursor: "pointer",
+                                transition: "all 0.3s ease"
+                            }}
+                        />
+                    ))}
                 </div>
-            </div>
+            </motion.div>
 
             {/* Floating 3D elements */}
-            <div style={{ position: "absolute", left: px(1436), top: px(807), width: px(223), height: px(290) }}>
+            <motion.div style={{ y: yLaptop, position: "absolute", left: px(1436), top: px(940), width: px(223), height: px(290) }}>
                 <img src={imgLaptopBlue} alt="" style={{ width: "100%", height: "100%", objectFit: "contain", pointerEvents: "none" }} />
-            </div>
+            </motion.div>
 
-            <div style={{ position: "absolute", left: px(104), top: px(253), width: px(158), height: px(148), transform: "rotate(19.69deg)" }}>
+            <motion.div style={{ y: yIphone, position: "absolute", left: px(104), top: px(380), width: px(158), height: px(148), transform: "rotate(19.69deg)" }}>
                 <img src={imgTransparentIphone} alt="" style={{ width: "100%", height: "100%", objectFit: "contain", pointerEvents: "none" }} />
-            </div>
+            </motion.div>
 
         </div>
     );

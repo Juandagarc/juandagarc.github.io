@@ -14,8 +14,6 @@ export default function Home() {
       <AboutSection />
       <WorkExperienceSection />
       <ProjectsSection />
-      {/* Empty Contact Section Placeholder to allow scrolling */}
-      <div id="contact" style={{ width: "100vw", height: "100vh", backgroundColor: "#0d0d0d" }}></div>
     </main>
   );
 }
