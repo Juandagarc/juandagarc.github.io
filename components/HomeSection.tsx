@@ -3,11 +3,12 @@
 import { useTranslation } from "./I18nProvider";
 import { px } from "../utils/px";
 import { motion, useScroll, useTransform } from "framer-motion";
+import Image from "next/image";
 
-const imgMegaphone = "./assets/868b5bbaedc840a029791784ced86b2892ddea54.png";
-const imgShapes = "./assets/e52db3117dd722c709f957c8c46d77bc91992ff3.png";
-const imgDoubleDown = "./assets/6b67e94644a008c44eb8be2a796f9a04f64046af.png";
-const imgLines = "./assets/617a64f8be69ee9564acd32aa96143ca34cdfeeb.svg";
+const imgMegaphone = "/assets/868b5bbaedc840a029791784ced86b2892ddea54.webp";
+const imgShapes = "/assets/e52db3117dd722c709f957c8c46d77bc91992ff3.webp";
+const imgDoubleDown = "/assets/6b67e94644a008c44eb8be2a796f9a04f64046af.webp";
+const imgLines = "/assets/617a64f8be69ee9564acd32aa96143ca34cdfeeb.svg";
 
 export default function HomeSection() {
     const { t, language } = useTranslation();
@@ -67,7 +68,7 @@ export default function HomeSection() {
                 }}
             >
                 <div style={{ position: "absolute", top: px(-5), left: 0, width: "100%", height: px(20) }}>
-                    <img src={imgLines} alt="" style={{ display: "block", width: "100%", height: "100%" }} />
+                    <Image src={imgLines} alt="" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" style={{ display: "block", objectFit: "contain" }} />
                 </div>
             </div>
 
@@ -82,10 +83,12 @@ export default function HomeSection() {
                     height: px(152),
                 }}
             >
-                <img
+                <Image
                     src={imgMegaphone}
                     alt=""
-                    style={{ width: "100%", height: "100%", objectFit: "contain", pointerEvents: "none" }}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    style={{ objectFit: "contain", pointerEvents: "none" }}
                 />
             </motion.div>
 
@@ -100,10 +103,12 @@ export default function HomeSection() {
                     height: px(374),
                 }}
             >
-                <img
+                <Image
                     src={imgShapes}
                     alt=""
-                    style={{ width: "100%", height: "100%", objectFit: "contain", pointerEvents: "none" }}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    style={{ objectFit: "contain", pointerEvents: "none" }}
                 />
             </motion.div>
 
@@ -125,10 +130,12 @@ export default function HomeSection() {
                     cursor: "pointer",
                 }}
             >
-                <img
+                <Image
                     src={imgDoubleDown}
                     alt=""
-                    style={{ width: "100%", height: "100%", objectFit: "contain", pointerEvents: "none" }}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    style={{ objectFit: "contain", pointerEvents: "none" }}
                 />
             </motion.div>
         </div>

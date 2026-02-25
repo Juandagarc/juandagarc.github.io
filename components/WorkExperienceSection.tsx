@@ -3,11 +3,12 @@ import { useRef } from "react";
 import { useTranslation } from "./I18nProvider";
 import { px } from "../utils/px";
 import { motion, useScroll, useTransform } from "framer-motion";
+import Image from "next/image";
 
-const imgGlassBulbWithAiStar = "./assets/glass-bulb.png"; // bulb icon
-const imgFloatingAbstractObjectsMadeOfGlass = "./assets/floating-objects.png"; // stones
-const imgFlow = "./assets/flow-line.svg"; // the big svg line
-const imgStar = "./assets/iridescent-rhombus.png"; // it turns out the "rhombus" asset was actually the star based on coordinates
+const imgGlassBulbWithAiStar = "/assets/glass-bulb.webp"; // bulb icon
+const imgFloatingAbstractObjectsMadeOfGlass = "/assets/floating-objects.webp"; // stones
+const imgFlow = "/assets/flow-line.svg"; // the big svg line
+const imgStar = "/assets/iridescent-rhombus.webp"; // it turns out the "rhombus" asset was actually the star based on coordinates
 
 export default function WorkExperienceSection() {
     const { t, language } = useTranslation();
@@ -74,22 +75,22 @@ export default function WorkExperienceSection() {
             {/* Floating Icons near title */}
             {/* Figma absolute coords relative to section: Bulb(998, 393), Star(1389, 651) */}
             <motion.div style={{ position: "absolute", left: language === "es" ? px(850) : px(998), top: language === "es" ? px(400) : px(393), width: px(63), height: px(77), transform: "rotate(-70.43deg)", zIndex: 10, y: yBulb }}>
-                <img src={imgGlassBulbWithAiStar} alt="" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                <Image src={imgGlassBulbWithAiStar} alt="" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" style={{ objectFit: "contain" }} />
             </motion.div>
 
             <motion.div style={{ position: "absolute", left: language === "es" ? px(1250) : px(1398), top: language === "es" ? px(650) : px(651), width: px(85), height: px(75), transform: "rotate(21.83deg)", zIndex: 10, y: yStar }}>
-                <img src={imgStar} alt="" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                <Image src={imgStar} alt="" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" style={{ objectFit: "contain" }} />
             </motion.div>
 
             {/* Floating abstract objects (stones) */}
             <motion.div style={{ position: "absolute", left: px(1431), top: px(757), width: px(297), height: px(372), y: yStones }}>
-                <img src={imgFloatingAbstractObjectsMadeOfGlass} alt="" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                <Image src={imgFloatingAbstractObjectsMadeOfGlass} alt="" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" style={{ objectFit: "contain" }} />
             </motion.div>
 
             {/* Flow SVG line connecting everything */}
             <div style={{ position: "absolute", left: px(277.5), top: px(154), width: px(421), height: px(810), zIndex: 10, pointerEvents: "none" }}>
                 <div style={{ position: "absolute", top: "-0.99%", right: "0%", bottom: "-1.07%", left: "-2.06%" }}>
-                    <img src={imgFlow} alt="" style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }} />
+                    <Image src={imgFlow} alt="" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" style={{ objectFit: "contain", display: "block" }} />
                 </div>
             </div>
 

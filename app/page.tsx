@@ -8,7 +8,7 @@ import ProjectsSection from "../components/ProjectsSection";
 
 export default function Home() {
   return (
-    <main style={{ backgroundColor: "#0d0d0d", minHeight: "100vh" }}>
+    <main style={{ backgroundColor: "#0d0d0d", minHeight: "100vh", position: "relative" }}>
       <Navbar />
       <HomeSection />
       <AboutSection />

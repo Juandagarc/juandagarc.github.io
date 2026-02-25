@@ -3,9 +3,10 @@
 import { useTranslation } from "./I18nProvider";
 import { px } from "../utils/px";
 import { usePathname, useRouter } from "next/navigation";
+import Image from "next/image";
 
-const imgEarthGlobe = "./assets/92b9b428999016f1c32488d030aef3a460492980.png";
-const imgLogo = "./assets/105a200fc672a2ad41d145328a723eeb0564bbc1.svg";
+const imgEarthGlobe = "/assets/92b9b428999016f1c32488d030aef3a460492980.webp";
+const imgLogo = "/assets/105a200fc672a2ad41d145328a723eeb0564bbc1.svg";
 
 export default function Navbar() {
     const { t, language, setLanguage } = useTranslation();
@@ -51,10 +52,12 @@ export default function Navbar() {
                 onClick={() => handleScroll("home")}
             >
                 <div style={{ position: "relative", width: px(40), height: px(20) }}>
-                    <img
+                    <Image
                         src={imgLogo}
                         alt=""
-                        style={{ position: "absolute", display: "block", width: "100%", height: "100%" }}
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        style={{ display: "block" }}
                     />
                 </div>
                 <p
@@ -126,11 +129,15 @@ export default function Navbar() {
                         justifyContent: "center",
                     }}
                 >
-                    <img
-                        src={imgEarthGlobe}
-                        alt=""
-                        style={{ width: "100%", height: "100%", objectFit: "contain", pointerEvents: "none" }}
-                    />
+                    <div style={{ position: "relative", width: "100%", height: "100%" }}>
+                        <Image
+                            src={imgEarthGlobe}
+                            alt=""
+                            fill
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                            style={{ objectFit: "contain", pointerEvents: "none" }}
+                        />
+                    </div>
                 </button>
             </div>
         </div>

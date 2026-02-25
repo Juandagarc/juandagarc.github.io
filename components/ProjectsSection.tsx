@@ -4,15 +4,16 @@ import { useState, useRef } from "react";
 import { useTranslation } from "./I18nProvider";
 import { px } from "../utils/px";
 import { motion, useScroll, useTransform } from "framer-motion";
+import Image from "next/image";
 
-const imgExternalLink = "./assets/external-link.png";
-const imgImage1 = "./assets/social-top.png"; // reusing github icon
-const imgMac = "./assets/mac-mockup.webp";
-const imgForward = "./assets/forward-arrow.png";
-const imgBack = "./assets/back-arrow.png";
-const imgLaptopBlue = "./assets/laptop-blue.png";
-const imgTransparentIphone = "./assets/transparent-iphone.png";
-const imgPagination = "./assets/pagination.svg";
+const imgExternalLink = "/assets/external-link.webp";
+const imgImage1 = "/assets/social-top.webp"; // reusing github icon
+const imgMac = "/assets/mac-mockup.webp";
+const imgForward = "/assets/forward-arrow.webp";
+const imgBack = "/assets/back-arrow.webp";
+const imgLaptopBlue = "/assets/laptop-blue.webp";
+const imgTransparentIphone = "/assets/transparent-iphone.webp";
+const imgPagination = "/assets/pagination.svg";
 
 // The project items content component
 const ProjectItem = ({ title, description, link, github }: { title: string, description: string, link: string, github: string }) => {
@@ -24,7 +25,9 @@ const ProjectItem = ({ title, description, link, github }: { title: string, desc
             {/* Inner content */}
             <div style={{ zIndex: 2, position: "relative", width: "100%", height: "100%" }}>
                 <div style={{ position: "absolute", left: px(26), right: px(26), top: px(99), height: px(195) }}>
-                    <img src={imgMac} alt="" style={{ width: "120%", height: "135%", position: "absolute", left: "-10%", top: "-15%", objectFit: "contain" }} />
+                    <div style={{ position: "absolute", width: "120%", height: "135%", left: "-10%", top: "-15%" }}>
+                        <Image src={imgMac} alt="" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" style={{ objectFit: "contain" }} />
+                    </div>
                 </div>
 
                 <div style={{
@@ -46,11 +49,15 @@ const ProjectItem = ({ title, description, link, github }: { title: string, desc
 
                     {/* Buttons bottom */}
                     <div style={{ display: "flex", gap: px(25), marginTop: px(8) }}>
-                        <a href={link} target="_blank" rel="noreferrer" style={{ backgroundColor: "#5990ff", width: px(145), height: px(56), borderRadius: px(10), display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
-                            <img src={imgExternalLink} alt="" style={{ width: px(48), height: px(48), objectFit: "contain" }} />
+                        <a href={link} target="_blank" rel="noreferrer" aria-label="View Project" style={{ backgroundColor: "#5990ff", width: px(145), height: px(56), borderRadius: px(10), display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+                            <div style={{ position: "relative", width: px(48), height: px(48) }}>
+                                <Image src={imgExternalLink} alt="" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" style={{ objectFit: "contain" }} />
+                            </div>
                         </a>
-                        <a href={github} target="_blank" rel="noreferrer" style={{ backgroundColor: "#1e1e1e", width: px(145), height: px(56), borderRadius: px(10), display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
-                            <img src={imgImage1} alt="" style={{ width: px(48), height: px(48), objectFit: "cover" }} />
+                        <a href={github} target="_blank" rel="noreferrer" aria-label="View Source Code" style={{ backgroundColor: "#1e1e1e", width: px(145), height: px(56), borderRadius: px(10), display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+                            <div style={{ position: "relative", width: px(48), height: px(48) }}>
+                                <Image src={imgImage1} alt="" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" style={{ objectFit: "cover" }} />
+                            </div>
                         </a>
                     </div>
                 </div>
@@ -165,10 +172,10 @@ export default function ProjectsSection() {
 
                 {/* Back and Forward Arrow Buttons */}
                 <div onClick={prevSlide} style={{ position: "absolute", top: px(257), left: px(113), width: px(50), height: px(50), opacity: 0.8, cursor: "pointer", zIndex: 10 }}>
-                    <img src={imgBack} alt="" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                    <Image src={imgBack} alt="" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" style={{ objectFit: "contain" }} />
                 </div>
                 <div onClick={nextSlide} style={{ position: "absolute", top: px(257), right: px(113), width: px(50), height: px(50), opacity: 0.8, cursor: "pointer", zIndex: 10 }}>
-                    <img src={imgForward} alt="" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                    <Image src={imgForward} alt="" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" style={{ objectFit: "contain" }} />
                 </div>
 
                 {/* Pagination indicators */}
@@ -192,11 +199,11 @@ export default function ProjectsSection() {
 
             {/* Floating 3D elements */}
             <motion.div style={{ y: yLaptop, position: "absolute", left: px(1436), top: px(940), width: px(223), height: px(290) }}>
-                <img src={imgLaptopBlue} alt="" style={{ width: "100%", height: "100%", objectFit: "contain", pointerEvents: "none" }} />
+                <Image src={imgLaptopBlue} alt="" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" style={{ objectFit: "contain", pointerEvents: "none" }} />
             </motion.div>
 
             <motion.div style={{ y: yIphone, position: "absolute", left: px(104), top: px(380), width: px(158), height: px(148), transform: "rotate(19.69deg)" }}>
-                <img src={imgTransparentIphone} alt="" style={{ width: "100%", height: "100%", objectFit: "contain", pointerEvents: "none" }} />
+                <Image src={imgTransparentIphone} alt="" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" style={{ objectFit: "contain", pointerEvents: "none" }} />
             </motion.div>
 
         </div>
