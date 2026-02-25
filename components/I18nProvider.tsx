@@ -20,6 +20,20 @@ const translations: Record<Language, Translations> = { en, es };
 export const I18nProvider = ({ children }: { children: ReactNode }) => {
     const [language, setLanguage] = useState<Language>("en");
 
+    // Load language from localStorage on mount
+    React.useEffect(() => {
+        const storedLang = localStorage.getItem("portfolioLanguaje");
+        if (storedLang && (storedLang === "en" || storedLang === "es")) {
+            setLanguage(storedLang as Language);
+        }
+    }, []);
+
+    // Save language to localStorage when it changes
+    const changeLanguage = (lang: Language) => {
+        setLanguage(lang);
+        localStorage.setItem("portfolioLanguaje", lang);
+    };
+
     const t = (path: string): string => {
         const keys = path.split(".");
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -35,7 +49,7 @@ export const I18nProvider = ({ children }: { children: ReactNode }) => {
     };
 
     return (
-        <I18nContext.Provider value={{ language, setLanguage, t }}>
+        <I18nContext.Provider value={{ language, setLanguage: changeLanguage, t }}>
             {children}
         </I18nContext.Provider>
     );
