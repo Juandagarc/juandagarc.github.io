@@ -2,6 +2,7 @@
 
 import { useTranslation } from "./I18nProvider";
 import { px } from "../utils/px";
+import { useIsMobile } from "../utils/useIsMobile";
 import { motion, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
 
@@ -13,18 +14,101 @@ const imgLines = "/assets/617a64f8be69ee9564acd32aa96143ca34cdfeeb.svg";
 export default function HomeSection() {
     const { t, language } = useTranslation();
     const { scrollY } = useScroll();
+    const isMobile = useIsMobile();
 
     // Parallax values
     const yHero = useTransform(scrollY, [0, 1000], [0, 200]);
     const yMegaphone = useTransform(scrollY, [0, 1000], [0, -150]);
     const yShapes = useTransform(scrollY, [0, 1000], [0, 150]);
 
+    const scrollToAbout = () => {
+        const el = document.getElementById("about");
+        if (el) el.scrollIntoView({ behavior: "smooth" });
+    };
+
+    // ── MOBILE LAYOUT ───────────────────────────────────────────────────────
+    if (isMobile) {
+        return (
+            <div
+                id="home"
+                style={{
+                    width: "100%",
+                    minHeight: "100svh",
+                    position: "relative",
+                    backgroundColor: "#0d0d0d",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    paddingTop: 80,
+                    paddingBottom: 60,
+                    paddingLeft: 24,
+                    paddingRight: 24,
+                    boxSizing: "border-box",
+                    overflow: "hidden",
+                }}
+            >
+
+
+                {/* Megaphone */}
+                <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.7, ease: "easeOut" }}
+                    style={{ position: "relative", width: 160, height: 100, marginBottom: 32 }}
+                >
+                    <Image src={imgMegaphone} alt="" fill priority sizes="200px" style={{ objectFit: "contain" }} />
+                </motion.div>
+
+                {/* Hero text */}
+                <motion.div
+                    initial={{ opacity: 0, y: 40 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
+                    style={{
+                        textAlign: "center",
+                        fontFamily: "'Plus Jakarta Sans', sans-serif",
+                        fontWeight: 800,
+                        fontSize: 52,
+                        lineHeight: "1.15",
+                        color: "#ffffff",
+                    }}
+                >
+                    <div style={{ color: "#ffae00" }}>{t("hero.building")}</div>
+                    <div style={{ color: "#5990ff" }}>{t("hero.experiences")}</div>
+                    <div>
+                        <span>{t("hero.that")}</span>
+                        <span style={{ color: "#07cf07" }}>{t("hero.last")}</span>
+                    </div>
+                </motion.div>
+
+                {/* Scroll down indicator */}
+                <motion.div
+                    initial={{ y: 0 }}
+                    animate={{ y: [0, 10, 0] }}
+                    transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                    onClick={scrollToAbout}
+                    style={{
+                        marginTop: 48,
+                        position: "relative",
+                        width: 36,
+                        height: 36,
+                        cursor: "pointer",
+                    }}
+                >
+                    <Image src={imgDoubleDown} alt="" fill sizes="48px" style={{ objectFit: "contain" }} />
+                </motion.div>
+            </div>
+        );
+    }
+
+    // ── DESKTOP LAYOUT ──────────────────────────────────────────────────────
     return (
         <div
             id="home"
             style={{
                 width: "100vw",
-                height: px(1117), // 64.64vw
+                height: px(1117),
                 position: "relative",
             }}
         >
@@ -117,10 +201,7 @@ export default function HomeSection() {
                 initial={{ y: 0 }}
                 animate={{ y: [0, 10, 0] }}
                 transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-                onClick={() => {
-                    const el = document.getElementById("about");
-                    if (el) el.scrollIntoView({ behavior: "smooth" });
-                }}
+                onClick={scrollToAbout}
                 style={{
                     position: "absolute",
                     left: px(847),
