@@ -5,6 +5,7 @@ import { px } from "../utils/px";
 import { useIsMobile } from "../utils/useIsMobile";
 import { motion, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
+import { GodRays } from "@paper-design/shaders-react";
 
 const imgMegaphone = "/assets/868b5bbaedc840a029791784ced86b2892ddea54.webp";
 const imgShapes = "/assets/e52db3117dd722c709f957c8c46d77bc91992ff3.webp";
@@ -48,7 +49,26 @@ export default function HomeSection() {
                     overflow: "hidden",
                 }}
             >
-
+                {/* GodRays Background */}
+                <div style={{ position: "absolute", left: 0, top: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 0, WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%)", maskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%)" }}>
+                    <GodRays
+                        colorBack="#00000000"
+                        colors={["#a1a1aa40", "#e4e4e730", "#71717a40", "#52525b30"]}
+                        colorBloom="#a1a1aa"
+                        offsetX={0.5}
+                        offsetY={-0.5}
+                        intensity={0.4}
+                        spotty={0.45}
+                        midSize={10}
+                        midIntensity={0}
+                        density={0.38}
+                        bloom={0.3}
+                        speed={0.5}
+                        scale={1.6}
+                        frame={3332042.8159981333}
+                        style={{ height: "100%", width: "100%" }}
+                    />
+                </div>
 
                 {/* Megaphone */}
                 <motion.div
@@ -112,6 +132,27 @@ export default function HomeSection() {
                 position: "relative",
             }}
         >
+            {/* GodRays Background */}
+            <div style={{ position: "absolute", left: 0, top: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 0, WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%)", maskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%)" }}>
+                <GodRays
+                    colorBack="#00000000"
+                    colors={["#a1a1aa40", "#e4e4e730", "#71717a40", "#52525b30"]}
+                    colorBloom="#a1a1aa"
+                    offsetX={0.85}
+                    offsetY={-1}
+                    intensity={0.5}
+                    spotty={0.45}
+                    midSize={10}
+                    midIntensity={0}
+                    density={0.38}
+                    bloom={0.3}
+                    speed={0.5}
+                    scale={1.6}
+                    frame={3332042.8159981333}
+                    style={{ height: "100%", width: "100%" }}
+                />
+            </div>
+
             {/* ── HERO TEXT: x:378 y:318 w:971 h:480 ── */}
             <motion.div
                 initial={{ opacity: 0, y: 50 }}
