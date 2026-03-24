@@ -49,13 +49,36 @@ export default function Contact() {
         detectRetina: true,
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        const form = e.currentTarget;
         setStatus("submitting");
-        setTimeout(() => {
+
+        const formData = new FormData(form);
+        const data = {
+            name: formData.get("name"),
+            email: formData.get("email"),
+            subject: formData.get("subject"),
+            message: formData.get("message"),
+        };
+
+        try {
+            const res = await fetch("/api/contact", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data),
+            });
+            
+            if (!res.ok) throw new Error("Failed to send message");
+            
             setStatus("success");
+            form.reset();
             setTimeout(() => setStatus("idle"), 3000);
-        }, 1500);
+        } catch (error) {
+            console.error(error);
+            setStatus("idle");
+            alert(t("contact.error") || "Something went wrong. Please try again.");
+        }
     };
 
     const inputStyle: React.CSSProperties = {
@@ -167,13 +190,13 @@ export default function Contact() {
                         }}>
                             <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
                                 <label style={labelStyle}>{t("contact.name") || "Your Name"}</label>
-                                <input required type="text" placeholder={t("contact.placeholderName") || "John Doe"} style={inputStyle}
+                                <input name="name" required type="text" placeholder={t("contact.placeholderName") || "John Doe"} style={inputStyle}
                                     onFocus={e => e.target.style.borderColor = "#07cf07"}
                                     onBlur={e => e.target.style.borderColor = "rgba(255, 255, 255, 0.1)"} />
                             </div>
                             <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
                                 <label style={labelStyle}>{t("contact.email") || "Your Email"}</label>
-                                <input required type="email" placeholder={t("contact.placeholderEmail") || "john@example.com"} style={inputStyle}
+                                <input name="email" required type="email" placeholder={t("contact.placeholderEmail") || "john@example.com"} style={inputStyle}
                                     onFocus={e => e.target.style.borderColor = "#07cf07"}
                                     onBlur={e => e.target.style.borderColor = "rgba(255, 255, 255, 0.1)"} />
                             </div>
@@ -181,14 +204,14 @@ export default function Contact() {
 
                         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                             <label style={labelStyle}>{t("contact.subject") || "Subject"}</label>
-                            <input required type="text" placeholder={t("contact.placeholderSubject") || "How can I help you?"} style={inputStyle}
+                            <input name="subject" required type="text" placeholder={t("contact.placeholderSubject") || "How can I help you?"} style={inputStyle}
                                 onFocus={e => e.target.style.borderColor = "#07cf07"}
                                 onBlur={e => e.target.style.borderColor = "rgba(255, 255, 255, 0.1)"} />
                         </div>
 
                         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                             <label style={labelStyle}>{t("contact.message") || "Message"}</label>
-                            <textarea required rows={isMobile ? 4 : 5}
+                            <textarea name="message" required rows={isMobile ? 4 : 5}
                                 placeholder={t("contact.placeholderMessage") || "Tell me about your project..."}
                                 style={{ ...inputStyle, resize: "vertical" }}
                                 onFocus={e => e.target.style.borderColor = "#07cf07"}
