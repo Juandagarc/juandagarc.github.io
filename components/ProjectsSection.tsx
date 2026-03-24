@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "./I18nProvider";
 import { px } from "../utils/px";
 import { useIsMobile } from "../utils/useIsMobile";
@@ -16,30 +16,40 @@ const imgLaptopBlue = "/assets/laptop-blue.webp";
 const imgTransparentIphone = "/assets/transparent-iphone.webp";
 
 // ── Desktop-only project card ────────────────────────────────────────────────
-const ProjectItemDesktop = ({ title, description, link, github }: { title: string; description: string; link: string; github: string }) => (
-    <div style={{ height: px(564), position: "relative", width: px(385), flexShrink: 0 }}>
+const ProjectItemDesktop = ({ title, description, link, github, image }: { title: string; description: string; link: string; github: string; image?: string }) => (
+    <div style={{ height: px(650), position: "relative", width: px(385), flexShrink: 0 }}>
         <div style={{ backgroundColor: "white", position: "absolute", top: 0, left: 0, right: 0, bottom: 0, borderRadius: px(10) }} />
         <div style={{ zIndex: 2, position: "relative", width: "100%", height: "100%" }}>
             <div style={{ position: "absolute", left: px(26), right: px(26), top: px(99), height: px(195) }}>
-                <div style={{ position: "absolute", width: "120%", height: "135%", left: "-10%", top: "-15%" }}>
+                <div style={{ position: "absolute", width: "120%", height: "135%", left: "-10%", top: "-15%", zIndex: 2, pointerEvents: "none" }}>
                     <Image src={imgMac} alt="" fill sizes="33vw" style={{ objectFit: "contain" }} />
                 </div>
+                {image && (
+                    <div style={{ position: "absolute", left: 0, top: 0, width: "100%", height: "100%", zIndex: 3, overflow: "hidden", borderRadius: px(4), backgroundColor: "white" }}>
+                        <Image src={image} alt={title} fill style={{ objectFit: "contain", objectPosition: "center" }} />
+                    </div>
+                )}
             </div>
             <div style={{ position: "absolute", top: px(290), left: px(26), right: px(26), display: "flex", flexDirection: "column", gap: px(12) }}>
-                <div style={{ color: "black", fontWeight: 700, fontSize: px(30), fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{title}</div>
-                <div style={{ color: "black", fontWeight: 500, fontSize: px(24.355), fontFamily: "'Plus Jakarta Sans', sans-serif", whiteSpace: "pre-wrap" }}>{description}</div>
-                <div style={{ display: "flex", gap: px(25), marginTop: px(8) }}>
-                    <a href={link} target="_blank" rel="noreferrer" aria-label="View Project" style={{ backgroundColor: "#5990ff", width: px(145), height: px(56), borderRadius: px(10), display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <div style={{ position: "relative", width: px(48), height: px(48) }}>
+                <div style={{ color: "black", fontWeight: 700, fontSize: px(30), fontFamily: "'Plus Jakarta Sans', sans-serif", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{title}</div>
+                <div style={{ color: "black", fontWeight: 500, fontSize: px(23), fontFamily: "'Plus Jakarta Sans', sans-serif", display: "-webkit-box", WebkitLineClamp: 5, WebkitBoxOrient: "vertical", overflow: "hidden", textOverflow: "ellipsis", minHeight: px(130) }}>{description}</div>
+            </div>
+            {/* Buttons anchored to bottom */}
+            <div style={{ position: "absolute", bottom: px(30), left: px(26), right: px(26), display: "flex", gap: px(20) }}>
+                {link && (
+                    <a href={link} target="_blank" rel="noreferrer" aria-label="View Project" style={{ backgroundColor: "#5990ff", flex: 1, height: px(56), borderRadius: px(10), display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <div style={{ position: "relative", width: px(40), height: px(40) }}>
                             <Image src={imgExternalLink} alt="" fill sizes="5vw" style={{ objectFit: "contain" }} />
                         </div>
                     </a>
-                    <a href={github} target="_blank" rel="noreferrer" aria-label="View Source Code" style={{ backgroundColor: "#1e1e1e", width: px(145), height: px(56), borderRadius: px(10), display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <div style={{ position: "relative", width: px(48), height: px(48) }}>
+                )}
+                {github && (
+                    <a href={github} target="_blank" rel="noreferrer" aria-label="View Source Code" style={{ backgroundColor: "#1e1e1e", flex: 1, height: px(56), borderRadius: px(10), display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <div style={{ position: "relative", width: px(40), height: px(40) }}>
                             <Image src={imgGitHub} alt="" fill sizes="5vw" style={{ objectFit: "cover" }} />
                         </div>
                     </a>
-                </div>
+                )}
             </div>
         </div>
         <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: px(65), zIndex: 1 }}>
@@ -54,7 +64,7 @@ const ProjectItemDesktop = ({ title, description, link, github }: { title: strin
 );
 
 // ── Mobile-only project card ─────────────────────────────────────────────────
-const ProjectItemMobile = ({ title, description, link, github }: { title: string; description: string; link: string; github: string }) => (
+const ProjectItemMobile = ({ title, description, link, github, image }: { title: string; description: string; link: string; github: string; image?: string }) => (
     <div style={{
         flexShrink: 0,
         width: 300,
@@ -71,26 +81,37 @@ const ProjectItemMobile = ({ title, description, link, github }: { title: string
             <div style={{ width: 12, height: 12, borderRadius: "50%", backgroundColor: "#39e239" }} />
         </div>
         {/* Mac mockup */}
-        <div style={{ position: "relative", width: "100%", height: 160 }}>
-            <Image src={imgMac} alt="" fill sizes="300px" style={{ objectFit: "contain", padding: "0 8px" }} />
+        <div style={{ position: "relative", width: "100%", height: 160, display: "flex", justifyContent: "center", alignItems: "center" }}>
+            <div style={{ position: "absolute", width: "100%", height: "100%", zIndex: 2, pointerEvents: "none" }}>
+                <Image src={imgMac} alt="" fill sizes="300px" style={{ objectFit: "contain", padding: "0 8px" }} />
+            </div>
+            {image && (
+                <div style={{ position: "absolute", width: "calc(100% - 48px)", height: "calc(100% - 32px)", top: 16, zIndex: 3, borderRadius: 4, overflow: "hidden", backgroundColor: "white" }}>
+                    <Image src={image} alt={title} fill style={{ objectFit: "contain", objectPosition: "center" }} />
+                </div>
+            )}
         </div>
         {/* Content */}
-        <div style={{ padding: "16px 20px 20px", display: "flex", flexDirection: "column", gap: 8, flex: 1 }}>
-            <div style={{ color: "black", fontWeight: 700, fontSize: 18, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{title}</div>
-            <div style={{ color: "#444", fontWeight: 400, fontSize: 13, fontFamily: "'Plus Jakarta Sans', sans-serif", lineHeight: 1.5, flex: 1 }}>{description}</div>
-            <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
-                <a href={link} target="_blank" rel="noreferrer" aria-label="View Project"
-                    style={{ flex: 1, backgroundColor: "#5990ff", height: 40, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <div style={{ position: "relative", width: 22, height: 22 }}>
-                        <Image src={imgExternalLink} alt="" fill sizes="32px" style={{ objectFit: "contain" }} />
-                    </div>
-                </a>
-                <a href={github} target="_blank" rel="noreferrer" aria-label="View Source Code"
-                    style={{ flex: 1, backgroundColor: "#1e1e1e", height: 40, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <div style={{ position: "relative", width: 22, height: 22 }}>
-                        <Image src={imgGitHub} alt="" fill sizes="32px" style={{ objectFit: "cover", borderRadius: "50%" }} />
-                    </div>
-                </a>
+        <div style={{ padding: "16px 20px 20px", display: "flex", flexDirection: "column", gap: 12, flex: 1, minHeight: 220 }}>
+            <div style={{ color: "black", fontWeight: 700, fontSize: 18, fontFamily: "'Plus Jakarta Sans', sans-serif", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{title}</div>
+            <div style={{ color: "#444", fontWeight: 400, fontSize: 13, fontFamily: "'Plus Jakarta Sans', sans-serif", lineHeight: 1.5, display: "-webkit-box", WebkitLineClamp: 5, WebkitBoxOrient: "vertical", overflow: "hidden", textOverflow: "ellipsis" }}>{description}</div>
+            <div style={{ display: "flex", gap: 12, marginTop: "auto" }}>
+                {link && (
+                    <a href={link} target="_blank" rel="noreferrer" aria-label="View Project"
+                        style={{ flex: 1, backgroundColor: "#5990ff", height: 40, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <div style={{ position: "relative", width: 22, height: 22 }}>
+                            <Image src={imgExternalLink} alt="" fill sizes="32px" style={{ objectFit: "contain" }} />
+                        </div>
+                    </a>
+                )}
+                {github && (
+                    <a href={github} target="_blank" rel="noreferrer" aria-label="View Source Code"
+                        style={{ flex: 1, backgroundColor: "#1e1e1e", height: 40, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <div style={{ position: "relative", width: 22, height: 22 }}>
+                            <Image src={imgGitHub} alt="" fill sizes="32px" style={{ objectFit: "cover", borderRadius: "50%" }} />
+                        </div>
+                    </a>
+                )}
             </div>
         </div>
     </div>
@@ -105,13 +126,24 @@ export default function ProjectsSection() {
     const yLaptop = useTransform(scrollYProgress, [0, 0.5, 1], [150, 0, -150]);
     const yIphone = useTransform(scrollYProgress, [0, 0.5, 1], [-100, 0, 100]);
 
-    const projectsData = [
+    const [projectsData, setProjectsData] = useState<Array<{ id: string | number; title: string; desc: string; link: string; github: string; image?: string }>>([
         { id: 1, title: t("projects.item_title") + " 1", desc: t("projects.item_desc"), link: "#", github: "#" },
         { id: 2, title: t("projects.item_title") + " 2", desc: t("projects.item_desc"), link: "#", github: "#" },
         { id: 3, title: t("projects.item_title") + " 3", desc: t("projects.item_desc"), link: "#", github: "#" },
         { id: 4, title: t("projects.item_title") + " 4", desc: t("projects.item_desc"), link: "#", github: "#" },
         { id: 5, title: t("projects.item_title") + " 5", desc: t("projects.item_desc"), link: "#", github: "#" },
-    ];
+    ]);
+
+    useEffect(() => {
+        fetch("/api/projects")
+            .then((res) => res.json())
+            .then((data) => {
+                if (data?.projects?.length > 0) {
+                    setProjectsData(data.projects);
+                }
+            })
+            .catch((e) => console.error("Failed to fetch custom projects:", e));
+    }, []);
 
     const [currentIndex, setCurrentIndex] = useState(0);
     const maxDesktop = projectsData.length - 3; // desktop shows 3 at once
@@ -169,7 +201,7 @@ export default function ProjectsSection() {
                                     boxSizing: "border-box",
                                 }}
                             >
-                                <ProjectItemMobile title={p.title} description={p.desc} link={p.link} github={p.github} />
+                                <ProjectItemMobile title={p.title} description={p.desc} link={p.link} github={p.github} image={p.image} />
                             </div>
                         ))}
                     </div>
@@ -212,7 +244,7 @@ export default function ProjectsSection() {
             ref={ref}
             style={{
                 width: "100vw",
-                height: px(1250),
+                height: px(1340),
                 position: "relative",
                 backgroundColor: "#0d0d0d",
                 overflow: "hidden",
@@ -262,7 +294,7 @@ export default function ProjectsSection() {
                         transition: "transform 0.4s ease-in-out",
                     }}>
                         {projectsData.map(p => (
-                            <ProjectItemDesktop key={p.id} title={p.title} description={p.desc} link={p.link} github={p.github} />
+                            <ProjectItemDesktop key={p.id} title={p.title} description={p.desc} link={p.link} github={p.github} image={p.image} />
                         ))}
                     </div>
                 </div>
@@ -276,7 +308,7 @@ export default function ProjectsSection() {
                 </div>
 
                 {/* Pagination */}
-                <div style={{ position: "absolute", top: px(600), left: "50%", transform: "translateX(-50%)", display: "flex", gap: px(12), zIndex: 1 }}>
+                <div style={{ position: "absolute", top: px(700), left: "50%", transform: "translateX(-50%)", display: "flex", gap: px(12), zIndex: 1 }}>
                     {projectsData.slice(0, projectsData.length - 2).map((_, idx) => (
                         <div
                             key={idx}
@@ -295,7 +327,7 @@ export default function ProjectsSection() {
             </motion.div>
 
             {/* Floating 3D elements */}
-            <motion.div style={{ y: yLaptop, position: "absolute", left: px(1436), top: px(940), width: px(223), height: px(290) }}>
+            <motion.div style={{ y: yLaptop, position: "absolute", left: px(1436), top: px(1040), width: px(223), height: px(290) }}>
                 <Image src={imgLaptopBlue} alt="" fill sizes="15vw" style={{ objectFit: "contain", pointerEvents: "none" }} />
             </motion.div>
             <motion.div style={{ y: yIphone, position: "absolute", left: px(104), top: px(380), width: px(158), height: px(148), transform: "rotate(19.69deg)" }}>
