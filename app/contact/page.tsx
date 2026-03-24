@@ -55,22 +55,17 @@ export default function Contact() {
         setStatus("submitting");
 
         const formData = new FormData(form);
-        const data = {
-            name: formData.get("name"),
-            email: formData.get("email"),
-            subject: formData.get("subject"),
-            message: formData.get("message"),
-        };
+        const name = formData.get("name") as string;
+        const email = formData.get("email") as string;
+        const subject = formData.get("subject") as string;
+        const message = formData.get("message") as string;
 
         try {
-            const res = await fetch("/api/contact", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data),
-            });
-            
-            if (!res.ok) throw new Error("Failed to send message");
-            
+            // Use mailto as the delivery method for static site hosting
+            const body = `Name: ${name}%0AEmail: ${email}%0A%0A${encodeURIComponent(message)}`;
+            const mailtoLink = `mailto:juandagarc.dev@gmail.com?subject=${encodeURIComponent(subject || "Portfolio Contact")}&body=${body}`;
+            window.open(mailtoLink, "_blank");
+
             setStatus("success");
             form.reset();
             setTimeout(() => setStatus("idle"), 3000);

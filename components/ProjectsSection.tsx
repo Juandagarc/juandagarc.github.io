@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useTranslation } from "./I18nProvider";
 import { px } from "../utils/px";
 import { useIsMobile } from "../utils/useIsMobile";
@@ -117,7 +117,7 @@ const ProjectItemMobile = ({ title, description, link, github, image }: { title:
     </div>
 );
 
-export default function ProjectsSection() {
+export default function ProjectsSection({ initialProjects }: { initialProjects?: Array<{ id: string; title: string; desc: string; link: string; github: string; image?: string }> }) {
     const { t } = useTranslation();
     const ref = useRef<HTMLDivElement>(null);
     const isMobile = useIsMobile();
@@ -126,24 +126,15 @@ export default function ProjectsSection() {
     const yLaptop = useTransform(scrollYProgress, [0, 0.5, 1], [150, 0, -150]);
     const yIphone = useTransform(scrollYProgress, [0, 0.5, 1], [-100, 0, 100]);
 
-    const [projectsData, setProjectsData] = useState<Array<{ id: string | number; title: string; desc: string; link: string; github: string; image?: string }>>([
-        { id: 1, title: t("projects.item_title") + " 1", desc: t("projects.item_desc"), link: "#", github: "#" },
-        { id: 2, title: t("projects.item_title") + " 2", desc: t("projects.item_desc"), link: "#", github: "#" },
-        { id: 3, title: t("projects.item_title") + " 3", desc: t("projects.item_desc"), link: "#", github: "#" },
-        { id: 4, title: t("projects.item_title") + " 4", desc: t("projects.item_desc"), link: "#", github: "#" },
-        { id: 5, title: t("projects.item_title") + " 5", desc: t("projects.item_desc"), link: "#", github: "#" },
-    ]);
+    const fallbackData: Array<{ id: string; title: string; desc: string; link: string; github: string; image?: string }> = [
+        { id: "1", title: t("projects.item_title") + " 1", desc: t("projects.item_desc"), link: "#", github: "#" },
+        { id: "2", title: t("projects.item_title") + " 2", desc: t("projects.item_desc"), link: "#", github: "#" },
+        { id: "3", title: t("projects.item_title") + " 3", desc: t("projects.item_desc"), link: "#", github: "#" },
+        { id: "4", title: t("projects.item_title") + " 4", desc: t("projects.item_desc"), link: "#", github: "#" },
+        { id: "5", title: t("projects.item_title") + " 5", desc: t("projects.item_desc"), link: "#", github: "#" },
+    ];
 
-    useEffect(() => {
-        fetch("/api/projects")
-            .then((res) => res.json())
-            .then((data) => {
-                if (data?.projects?.length > 0) {
-                    setProjectsData(data.projects);
-                }
-            })
-            .catch((e) => console.error("Failed to fetch custom projects:", e));
-    }, []);
+    const projectsData = (initialProjects && initialProjects.length > 0) ? initialProjects : fallbackData;
 
     const [currentIndex, setCurrentIndex] = useState(0);
     const maxDesktop = projectsData.length - 3; // desktop shows 3 at once
