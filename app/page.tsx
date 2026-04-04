@@ -5,6 +5,8 @@ import WorkExperienceSection from "../components/WorkExperienceSection";
 import ProjectsSection from "../components/ProjectsSection";
 import { getProjectsFromNotion } from "../utils/notion";
 
+export const revalidate = 1800; // Notion S3 URLs expire in 1h, regenerate every 30min
+
 export default async function Home() {
   const notionProjects = await getProjectsFromNotion();
 
