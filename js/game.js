@@ -1,13 +1,13 @@
 // "Break the glass": the minigame behind the closing mark. A glass statue with David's head comes to life with a gun,
 // crosses steel ledges (run, slide, double jump with a flip, wall jump up a chimney) and shoots down every
-// technology I use, each cast as a glass brick. Shots that miss leave holes where they land: in the steel,
-// or in the stone wall behind the level.
+// technology I use, each cast as a glass brick. Shots that miss leave their mark where they land: a hot hole in
+// the steel, a star of cracks in the glass wall behind the level.
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
-import { crystal, crystalMaterial, metalMaterial, solidGlass } from './materials.js';
+import { crystal, crystalMaterial, metalMaterial, solidGlass, COLORS, time } from './materials.js';
 import { halo, motes, createPost } from './fx.js';
 import { T } from './content.js';
-import { shot, shatter, tink, impact } from './sound.js';
+import { shot, shatter, tink, impact, scrape } from './sound.js';
 import { buildStatue as buildSculpture } from './statue.js';
 import { decodeScan } from './rooms/sculptures.js';
 
@@ -34,7 +34,7 @@ const GLASS = [ // [centre x, centre y, w, h, label]
   [45.4, 0.45, 1.6, 0.9, 'CI/CD'], [47.1, 0.45, 1.6, 0.9, 'Solidity'], [46.25, 1.35, 1.8, 0.9, 'Three.js'],
 ];
 const CHECKPOINTS = [[1, 0], [18, 0], [26, 8], [34, 0]];
-const BACK_Z = -2.6; // the stone wall behind everything
+const BACK_Z = -2.6; // the glass wall behind everything
 const STEEL_D = 0.8, GLASS_D = 0.45; // half depths
 const PW = 0.5, PH = 1.1, PH_SLIDE = 0.6, PH_CROUCH = 0.72; // the runner's box: standing, sliding, crouching
 const G = 34, RUN = 7.5, RUN_LOW = 2.6; // running and crouch-walking speeds
@@ -61,49 +61,61 @@ function canvasTex(size, draw) {
   return t;
 }
 
-// A bullet hole as it sits in the map: soot, a torn rim (petals of metal, or chips and cracks in stone), a black core.
+// Where a shot lands. In the glass wall: a bright pinprick, cracks running out of it with a little of the site's
+// cyan-to-pink in them, and a web of rings between. In steel: soot, petals of torn metal, a black core.
 function holeTexture(kind, seed) {
   const rnd = seeded(seed);
   return canvasTex(256, (g, S) => {
     const cx = S / 2, cy = S / 2;
+    g.lineCap = 'round'; g.lineJoin = 'round';
+    if (kind === 'wall') {
+      const n = 9 + Math.floor(rnd() * 5);
+      const rays = [];
+      for (let i = 0; i < n; i++) {
+        let a = (i / n) * Math.PI * 2 + rnd() * 0.5, r = 5;
+        const len = 62 + rnd() * 58, pts = [[cx + Math.cos(a) * r, cy + Math.sin(a) * r]];
+        while (r < len) { r += 7 + rnd() * 11; a += (rnd() - 0.5) * 0.28; pts.push([cx + Math.cos(a) * r, cy + Math.sin(a) * r]); }
+        rays.push(pts);
+        const tint = g.createLinearGradient(cx, cy, pts[pts.length - 1][0], pts[pts.length - 1][1]);
+        tint.addColorStop(0, 'rgba(95,232,255,.75)'); tint.addColorStop(0.55, 'rgba(140,123,255,.6)'); tint.addColorStop(1, 'rgba(242,123,255,0)');
+        g.beginPath(); pts.forEach(([x, y], k) => (k ? g.lineTo(x, y) : g.moveTo(x, y)));
+        g.strokeStyle = 'rgba(236,238,255,.7)'; g.lineWidth = 1.5; g.stroke();
+        g.strokeStyle = tint; g.lineWidth = 3.2; g.globalAlpha = 0.35; g.stroke(); g.globalAlpha = 1;
+      }
+      for (const ring of [0.28, 0.55]) { // the web between the cracks
+        g.beginPath();
+        rays.forEach((pts, i) => {
+          const q = pts[Math.min(pts.length - 1, Math.floor(pts.length * ring))], nxt = rays[(i + 1) % rays.length];
+          const q2 = nxt[Math.min(nxt.length - 1, Math.floor(nxt.length * ring))];
+          if (rnd() < 0.8) { g.moveTo(q[0], q[1]); g.quadraticCurveTo((q[0] + q2[0]) / 2 + (rnd() - 0.5) * 8, (q[1] + q2[1]) / 2 + (rnd() - 0.5) * 8, q2[0], q2[1]); }
+        });
+        g.strokeStyle = 'rgba(220,226,255,.38)'; g.lineWidth = 1; g.stroke();
+      }
+      const core = g.createRadialGradient(cx, cy, 0, cx, cy, 22);
+      core.addColorStop(0, 'rgba(255,255,255,.95)'); core.addColorStop(0.35, 'rgba(200,190,255,.45)'); core.addColorStop(1, 'rgba(140,123,255,0)');
+      g.fillStyle = core; g.beginPath(); g.arc(cx, cy, 22, 0, Math.PI * 2); g.fill();
+      g.fillStyle = 'rgba(6,6,14,.85)'; g.beginPath(); g.arc(cx, cy, 3.2, 0, Math.PI * 2); g.fill();
+      return;
+    }
     const soot = g.createRadialGradient(cx, cy, 0, cx, cy, S * 0.5);
     soot.addColorStop(0, 'rgba(0,0,0,1)'); soot.addColorStop(0.22, 'rgba(0,0,0,.8)');
     soot.addColorStop(0.5, 'rgba(0,0,0,.35)'); soot.addColorStop(1, 'rgba(0,0,0,0)');
     g.fillStyle = soot; g.fillRect(0, 0, S, S);
-    g.lineCap = 'round'; g.lineJoin = 'round';
-    if (kind === 'wall') {
-      const n = 6 + Math.floor(rnd() * 4);
-      for (let i = 0; i < n; i++) {
-        let a = (i / n) * Math.PI * 2 + rnd() * 0.6, r = 30;
-        const len = 70 + rnd() * 50;
-        g.beginPath(); g.moveTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
-        while (r < len) { r += 6 + rnd() * 10; a += (rnd() - 0.5) * 0.45; g.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r); }
-        g.strokeStyle = 'rgba(0,0,0,.8)'; g.lineWidth = 4; g.stroke();
-        g.strokeStyle = 'rgba(170,230,250,.6)'; g.lineWidth = 1.6; g.stroke();
-      }
-      for (let i = 0; i < 9; i++) { // chips knocked out of the stone
-        const a = rnd() * Math.PI * 2, r = 32 + rnd() * 16, s = 4 + rnd() * 7;
-        g.beginPath();
-        for (let k = 0; k < 4; k++) { const b = a + k * 1.7 + rnd(); g.lineTo(cx + Math.cos(a) * r + Math.cos(b) * s, cy + Math.sin(a) * r + Math.sin(b) * s); }
-        g.fillStyle = 'rgba(140,175,195,.45)'; g.fill();
-      }
-    } else {
-      const n = 9 + Math.floor(rnd() * 4);
-      for (let i = 0; i < n; i++) { // petals of torn steel curling out of the hole
-        const a = (i / n) * Math.PI * 2 + rnd() * 0.3, w = 0.22 + rnd() * 0.12, r0 = 24, r1 = 38 + rnd() * 16;
-        const grd = g.createLinearGradient(cx + Math.cos(a) * r0, cy + Math.sin(a) * r0, cx + Math.cos(a) * r1, cy + Math.sin(a) * r1);
-        grd.addColorStop(0, 'rgba(70,74,84,.95)'); grd.addColorStop(0.6, 'rgba(190,196,208,.9)'); grd.addColorStop(1, 'rgba(255,214,170,.85)');
-        g.beginPath();
-        g.moveTo(cx + Math.cos(a - w) * r0, cy + Math.sin(a - w) * r0);
-        g.lineTo(cx + Math.cos(a) * r1, cy + Math.sin(a) * r1);
-        g.lineTo(cx + Math.cos(a + w) * r0, cy + Math.sin(a + w) * r0);
-        g.fillStyle = grd; g.fill();
-      }
-      g.strokeStyle = 'rgba(255,190,130,.35)'; g.lineWidth = 2;
-      g.beginPath(); g.arc(cx, cy, 46, 0, Math.PI * 2); g.stroke();
+    const n = 9 + Math.floor(rnd() * 4);
+    for (let i = 0; i < n; i++) { // petals of torn steel curling out of the hole, their edges still hot
+      const a = (i / n) * Math.PI * 2 + rnd() * 0.3, w = 0.22 + rnd() * 0.12, r0 = 24, r1 = 38 + rnd() * 16;
+      const grd = g.createLinearGradient(cx + Math.cos(a) * r0, cy + Math.sin(a) * r0, cx + Math.cos(a) * r1, cy + Math.sin(a) * r1);
+      grd.addColorStop(0, 'rgba(70,74,84,.95)'); grd.addColorStop(0.6, 'rgba(190,196,208,.9)'); grd.addColorStop(1, 'rgba(255,170,226,.85)');
+      g.beginPath();
+      g.moveTo(cx + Math.cos(a - w) * r0, cy + Math.sin(a - w) * r0);
+      g.lineTo(cx + Math.cos(a) * r1, cy + Math.sin(a) * r1);
+      g.lineTo(cx + Math.cos(a + w) * r0, cy + Math.sin(a + w) * r0);
+      g.fillStyle = grd; g.fill();
     }
+    g.strokeStyle = 'rgba(242,123,255,.35)'; g.lineWidth = 2;
+    g.beginPath(); g.arc(cx, cy, 46, 0, Math.PI * 2); g.stroke();
     g.beginPath(); // the hole itself
-    for (let i = 0; i <= 18; i++) { const a = (i / 18) * Math.PI * 2, r = (kind === 'wall' ? 28 : 23) + rnd() * 7; g.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r); }
+    for (let i = 0; i <= 18; i++) { const a = (i / 18) * Math.PI * 2, r = 23 + rnd() * 7; g.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r); }
     g.fillStyle = '#000'; g.fill();
     g.strokeStyle = 'rgba(255,255,255,.18)'; g.lineWidth = 1.5; g.stroke();
   });
@@ -114,30 +126,54 @@ const softTex = (inner, outer) => canvasTex(128, (g, S) => {
   g.fillStyle = r; g.fillRect(0, 0, S, S);
 });
 
-// The wall behind the level: dark stone panels in a running bond, bevels catching a little cyan.
+// The wall behind the level: a glass curtain wall in the night, like the rest of the site. Big panes on thin dark
+// mullions whose edges catch the light, a soft reflection sliding across each pane, and behind the glass an aurora
+// drifting in the site's cyan, violet and pink.
 function backdropMaterial() {
   return new THREE.ShaderMaterial({
+    uniforms: { uTime: time, uA: { value: COLORS.cyan }, uB: { value: COLORS.pink }, uC: { value: COLORS.violet } },
     vertexShader: /* glsl */`
       varying vec3 vW;
       void main() { vec4 w = modelMatrix * vec4(position, 1.0); vW = w.xyz; gl_Position = projectionMatrix * viewMatrix * w; }
     `,
     fragmentShader: /* glsl */`
+      uniform float uTime;
+      uniform vec3 uA;
+      uniform vec3 uB;
+      uniform vec3 uC;
       varying vec3 vW;
       float hash(vec2 p) { return fract(sin(dot(p, vec2(41.3, 289.1))) * 43758.5453); }
+      float noise(vec2 p) {
+        vec2 i = floor(p), f = fract(p), u = f * f * (3.0 - 2.0 * f);
+        return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), u.x), mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), u.x), u.y);
+      }
+      float fbm(vec2 p) { float s = 0.0, a = 0.5; for (int i = 0; i < 5; i++) { s += a * noise(p); p = p * 2.03 + 17.1; a *= 0.5; } return s; }
+      vec3 iri(float k) { return k < 0.5 ? mix(uA, uC, k * 2.0) : mix(uC, uB, k * 2.0 - 1.0); }
       void main() {
-        vec2 size = vec2(2.4, 1.6);
-        vec2 c = vW.xy / size;
-        c.x += step(1.0, mod(floor(c.y), 2.0)) * 0.5;
-        vec2 id = floor(c), f = fract(c);
-        float e = min(min(f.x, 1.0 - f.x) * size.x, min(f.y, 1.0 - f.y) * size.y);
-        float seam = 1.0 - smoothstep(0.0, 0.022, e);
-        float bevel = smoothstep(0.022, 0.05, e) * (1.0 - smoothstep(0.05, 0.11, e));
+        vec2 p = vW.xy;
+        float t = uTime * 0.03;
+        // the night behind the glass, a touch of violet higher up, and the aurora
+        vec3 col = mix(vec3(0.008, 0.009, 0.018), vec3(0.02, 0.015, 0.04), smoothstep(-1.0, 14.0, p.y));
+        float n = fbm(p * vec2(0.07, 0.15) + vec2(t, -t * 0.6));
+        float band = smoothstep(0.42, 0.82, n) * (0.55 + 0.45 * sin(p.x * 0.11 + t * 3.0));
+        col += iri(fbm(p * 0.045 + 3.7 + t * 0.4)) * band * 0.085 * smoothstep(-2.0, 6.0, p.y);
+        // the panes
+        vec2 size = vec2(3.2, 2.4);
+        vec2 c = (p + vec2(0.0, 0.6)) / size, id = floor(c), f = fract(c);
+        vec2 e2 = min(f, 1.0 - f) * size;
+        float e = min(e2.x, e2.y);
         float h = hash(id);
-        vec3 col = mix(vec3(0.018, 0.02, 0.03), vec3(0.036, 0.038, 0.056), h);
-        col *= 0.65 + 0.35 * smoothstep(-1.0, 10.0, vW.y);
-        col += vec3(0.022, 0.055, 0.075) * bevel * (0.35 + 0.65 * step(0.5, f.y));
-        col += (hash(floor(vW.xy * 70.0)) - 0.5) * 0.012;
-        col = mix(col, vec3(0.004), seam);
+        col *= 0.88 + 0.24 * h;
+        float s = f.x * 0.9 + f.y * 0.5 + h * 0.8 + t * 0.5;
+        float sheen = exp(-pow((fract(s * 0.5) - 0.5) * 6.0, 2.0));
+        col += iri(fract(p.x * 0.015 + h)) * sheen * 0.016;
+        // mullions, dark, their edges lit (the top edge of each pane most)
+        float mull = 1.0 - smoothstep(0.012, 0.028, e);
+        float lit = smoothstep(0.028, 0.034, e) * (1.0 - smoothstep(0.034, 0.075, e));
+        col += iri(fract(p.x * 0.02 + p.y * 0.03)) * lit * (0.02 + 0.05 * step(0.5, f.y));
+        col = mix(col, vec3(0.003, 0.003, 0.007), mull);
+        col += (hash(floor(p * 60.0)) - 0.5) * 0.005;
+        col *= 0.55 + 0.45 * smoothstep(-2.0, 2.5, p.y);
         gl_FragColor = vec4(col, 1.0);
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
@@ -361,8 +397,8 @@ export function createGame({ renderer, usePost, pixelRatio, lang, reduced, scans
     const shards = Array.from({ length: 220 }, () => ({ m: add(new THREE.Mesh(shardGeo, shardMat)), v: new THREE.Vector3(), spin: new THREE.Vector3(), life: 0 }));
     const sparkGeo = new THREE.BoxGeometry(1, 0.012, 0.012);
     const sparkMats = {
-      hot: new THREE.MeshBasicMaterial({ color: '#ffb066', toneMapped: false, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }),
-      cold: new THREE.MeshBasicMaterial({ color: '#9ff3ff', toneMapped: false, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }),
+      hot: new THREE.MeshBasicMaterial({ color: '#ffa8dc', toneMapped: false, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }),
+      cold: new THREE.MeshBasicMaterial({ color: '#d4ccff', toneMapped: false, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }),
     };
     const sparks = Array.from({ length: 120 }, () => ({ m: add(new THREE.Mesh(sparkGeo, sparkMats.hot)), v: new THREE.Vector3(), life: 0 }));
     const puffTex = softTex('rgba(255,255,255,.55)', 'rgba(255,255,255,0)');
@@ -507,6 +543,7 @@ export function createGame({ renderer, usePost, pixelRatio, lang, reduced, scans
     root.hidden = true;
     document.documentElement.classList.remove('playing');
     Object.assign(input, { left: false, right: false, down: false, jumpHeld: false, firing: false, forward: false });
+    scrape(0);
   }
 
   // ---------------------------------------------------------------- effects
@@ -563,7 +600,7 @@ export function createGame({ renderer, usePost, pixelRatio, lang, reduced, scans
     const B = built;
     const h = B.holes[B.holeNext++ % B.holes.length];
     h.hole.material = B.holeMats[kind][Math.floor(Math.random() * 3)];
-    h.heat.material.color.set(kind === 'steel' ? '#ffb070' : '#9ff3ff');
+    h.heat.material.color.set(kind === 'steel' ? '#ff8fd6' : '#c4b6ff');
     h.g.position.copy(p).addScaledVector(n, 0.004 + (B.holeNext % 12) * 0.0005);
     h.g.lookAt(v3.copy(p).add(n));
     h.g.rotateZ(Math.random() * Math.PI * 2);
@@ -655,7 +692,7 @@ export function createGame({ renderer, usePost, pixelRatio, lang, reduced, scans
     } else if (hit.kind === 'wall') {
       hole('wall', p, n);
       spark(p, n, 7, 'cold', 4);
-      puff(p, 3, 0.45, 0.4, '#6f7a90');
+      puff(p, 3, 0.4, 0.4, '#a99cff', 0.06); // glass dust
       impact('wall');
     }
   }
@@ -733,16 +770,20 @@ export function createGame({ renderer, usePost, pixelRatio, lang, reduced, scans
     r.vy -= G * dt * (!input.jumpHeld && r.vy > 0 ? 2.1 : 1);
 
     r.wall = !r.onGround ? (hits(r.x - 0.06, r.y, r.h, solids) ? -1 : hits(r.x + 0.06, r.y, r.h, solids) ? 1 : 0) : 0;
-    r.wallSlide = !!r.wall && ax === r.wall && r.vy < 0.5;
+    // sliding down a wall: any time it touches one on the way down, unless pushing off it; pressing into it brakes
+    r.wallSlide = !!r.wall && r.vy < 0.5 && ax !== -r.wall;
     if (r.wallSlide) {
-      r.face = r.wall; // pressed against it, facing it
+      r.face = r.wall; // facing the wall it ran into, braced against it
       if (r.vy < 0) {
-        r.vy = Math.max(r.vy, -3.2);
+        r.vy = Math.max(r.vy, ax === r.wall ? -2.6 : -5.2);
         r.dustT -= dt;
         if (r.dustT <= 0) {
-          r.dustT = 0.06;
-          puff(new THREE.Vector3(r.x + r.wall * 0.3, r.y + 1.05, 0.2), 1, 0.2, -0.25); // under the hands
-          puff(new THREE.Vector3(r.x + r.wall * 0.3, r.y + 0.3, 0.2), 1, 0.24, -0.2); // and the foot
+          r.dustT = 0.045;
+          // at the wall's face and behind the figure, so the sparks never streak across the glass body
+          const wx = r.x + r.wall * 0.26;
+          puff(new THREE.Vector3(wx, r.y + 1.05, -0.12), 1, 0.2, -0.3); // under the hands
+          puff(new THREE.Vector3(wx, r.y + 0.3, -0.12), 1, 0.26, -0.25); // and the braced foot
+          spark(new THREE.Vector3(wx, r.y + 0.28, -0.16), new THREE.Vector3(-r.wall * 0.2, 1, -0.3), 2, 'hot', 2.2);
         }
       }
     }
@@ -881,6 +922,7 @@ export function createGame({ renderer, usePost, pixelRatio, lang, reduced, scans
     }
 
     pose(dt, t);
+    scrape(state !== 'play' ? 0 : r.wallSlide && r.vy < -0.5 ? 1 : r.slide > 0 ? 0.55 : 0);
     run.flash -= dt;
     B.statue.flash.material.opacity = run.flash > 0 ? 0.95 : 0;
 
@@ -964,13 +1006,14 @@ export function createGame({ renderer, usePost, pixelRatio, lang, reduced, scans
         spX: -0.62, spYaw: 0.12, spZ: rattle * 0.015, nkX: 0.62, nkY: 0,
       });
     } else if (!r.onGround && r.wallSlide) {
-      // sliding down a wall: both hands pressed to it, one foot braced against it, looking back over the shoulder
+      // sliding down a wall, facing it: both hands braced up against it, one foot planted flat on it, the other leg
+      // hanging, leaning in; it shudders as it slips
       const slip = r.vy < -0.5 ? 1 : 0;
-      const j = (o) => Math.sin(t * 24 + o) * 0.045 * slip;
+      const j = (o, a = 0.05) => (Math.sin(t * 31 + o) * 0.6 + Math.sin(t * 47 + o * 1.7) * 0.4) * a * slip;
       Object.assign(q, {
-        hipL: -1.0 + j(0), kneeL: 1.55, ankleL: -0.45, hipR: -0.2, kneeR: 0.55 + j(2), ankleR: 0.15,
-        shL: -2.35 + j(1), shLz: 0.3, elL: -0.35, shR: -2.0 + j(2.5), shRz: 0.25, elR: -0.4,
-        pelY: 0.525, pelYaw: 0, pelZ: 0, spX: 0.08, spYaw: 0, spZ: 0, nkX: 0.25, nkY: -0.55,
+        hipL: -1.05 + j(0), kneeL: 1.45 + j(1, 0.06), ankleL: -0.35, hipR: -0.2, kneeR: 0.55 + j(2, 0.06), ankleR: 0.35,
+        shL: -2.25 + j(3, 0.06), shLz: 0.22, elL: -0.75, shR: -1.75 + j(4, 0.05), shRz: 0.2, elR: -0.95,
+        pelY: 0.5 + j(5, 0.006), pelYaw: 0, pelZ: 0, spX: 0.1, spYaw: 0, spZ: j(6, 0.03), nkX: 0.15, nkY: -0.45,
       });
       tilt = -r.wall * 0.07;
     } else if (!r.onGround) {
@@ -1025,9 +1068,11 @@ export function createGame({ renderer, usePost, pixelRatio, lang, reduced, scans
     e(S.neck.rotation, 'x', q.nkX); e(S.neck.rotation, 'y', q.nkY);
     S.flip.rotation.x = r.flip > 0 ? r.flip * Math.PI * 2 : 0;
 
-    // turning round: swing through facing the camera, mirrored so the gun hand stays on the camera's side
+    // turning round: swing through facing the camera, mirrored so the gun hand stays on the camera's side; on a wall
+    // it turns side-on, its back square to the wall
     r.turnV += (r.face - r.turnV) * (1 - Math.exp(-dt * 16));
-    S.turn.rotation.y = r.turnV * (Math.PI / 2 - AIM_TURN);
+    r.sideOn = (r.sideOn || 0) + ((r.wallSlide && !r.onGround ? 1 : 0) - (r.sideOn || 0)) * (1 - Math.exp(-dt * 12));
+    S.turn.rotation.y = r.turnV * (Math.PI / 2 - AIM_TURN * (1 - 0.7 * r.sideOn));
     S.turn.scale.x = r.turnV >= 0 ? 1 : -1;
     S.root.position.set(r.x, r.y, 0);
     S.root.rotation.z += (tilt - S.root.rotation.z) * k;

@@ -9,11 +9,12 @@ import { skinnedGlass, solidGlass, metalMaterial } from './materials.js';
 const FLOOR = 0.07; // top of the scan's plinth
 export const STATUE_SCALE = 1.2; // scan units (one unit tall with the plinth) → metres
 
-// Joint centres in the scan (x: the statue's left, y: up, z: forward), read off the mesh.
+// Joint centres in the scan (x: the statue's left, y: up, z: forward), read off the mesh. The shoulders sit at the
+// centre of the joint, inside the deltoid, so a raised arm turns about the right point and keeps its shoulder.
 const J = {
   pelvis: [0, 0.52, 0.045], spine: [0, 0.6, 0.045], spineTop: [0, 0.8, 0.02], neck: [0.005, 0.822, 0.018], skull: [0.008, 0.9, 0.04],
-  shR: [-0.1, 0.775, 0.02], elR: [-0.128, 0.637, 0.035], wrR: [-0.138, 0.505, 0.105], handR: [-0.141, 0.445, 0.13],
-  shL: [0.108, 0.775, -0.015], elL: [0.143, 0.652, -0.05], wrL: [0.146, 0.682, 0.11], handL: [0.145, 0.682, 0.17],
+  shR: [-0.122, 0.768, 0.022], elR: [-0.128, 0.637, 0.035], wrR: [-0.138, 0.505, 0.105], handR: [-0.141, 0.445, 0.13],
+  shL: [0.128, 0.768, -0.015], elL: [0.143, 0.652, -0.05], wrL: [0.146, 0.682, 0.11], handL: [0.145, 0.682, 0.17],
   hipR: [-0.052, 0.5, 0.045], knR: [-0.064, 0.285, -0.012], anR: [-0.05, 0.112, -0.025], toeR: [-0.04, 0.078, 0.1],
   hipL: [0.052, 0.5, 0.045], knL: [0.052, 0.282, 0.042], anL: [0.07, 0.128, -0.125], toeL: [0.08, 0.075, -0.06],
 };
@@ -37,21 +38,29 @@ function segDist(p, a, b) {
   return p.distanceTo(a.clone().addScaledVector(ab, t));
 }
 
-// Which part of the body each vertex belongs to. Where an arm hangs against the torso or a hand rests on a thigh,
-// the surface normal tells the arm's inner face from the body's outer one.
-const HAND_R = [new THREE.Vector3(-0.138, 0.505, 0.105), new THREE.Vector3(-0.141, 0.445, 0.13)];
-function classify(x, y, z, nx) {
+// Which part of the body each vertex belongs to. The arms go by their own shape: a vertex is an arm's if it lies
+// within reach of the arm's axis and its surface faces away from that axis. Where an arm hangs against the body,
+// its inner face looks at the torso and the torso's flank looks back at it, so the two never get mixed up.
+const ARMS = {
+  armR: [[J.shR, J.elR, 0.034], [J.elR, J.wrR, 0.029], [J.wrR, J.handR, 0.042]], // the fist is wider than the wrist
+  armL: [[J.shL, J.elL, 0.034], [J.elL, J.wrL, 0.029], [J.wrL, J.handL, 0.042]],
+};
+function onArm(segs, x, y, z, nx, ny, nz) {
+  let best = null, hand = false;
+  for (const [a, b, r] of segs) {
+    const ab = [b[0] - a[0], b[1] - a[1], b[2] - a[2]];
+    const t = THREE.MathUtils.clamp(((x - a[0]) * ab[0] + (y - a[1]) * ab[1] + (z - a[2]) * ab[2]) / (ab[0] ** 2 + ab[1] ** 2 + ab[2] ** 2), 0, 1);
+    const d = [x - a[0] - ab[0] * t, y - a[1] - ab[1] * t, z - a[2] - ab[2] * t], len = Math.hypot(...d);
+    if (!best || len < best.len) { best = { len, d, r }; hand = r > 0.04; }
+  }
+  if (best.len >= best.r + 0.012) return false;
+  // the fist's curled fingers face every way: there only the side towards the thigh has to face out
+  if (hand && Math.abs(x) > 0.125) return true;
+  return (best.d[0] * nx + best.d[1] * ny + best.d[2] * nz) / best.len > 0.25;
+}
+function classify(x, y, z, nx, ny, nz) {
   if (y > 0.857) return 'head';
-  if (x < -0.098 && y > 0.42 && y < 0.79) {
-    // low down, only what is really the hand (the top of the strut stands at the same height, behind it)
-    if (y < 0.5 && segDist(new THREE.Vector3(x, y, z), HAND_R[0], HAND_R[1]) > 0.05) return 'legR';
-    if (x > -0.118 && y < 0.74 && nx < -0.35) return y < 0.47 ? 'legR' : 'torso';
-    return 'armR';
-  }
-  if (x > 0.1 && y > 0.6 && y < 0.8) {
-    if (x < 0.118 && y < 0.74 && nx > 0.35) return 'torso';
-    return 'armL';
-  }
+  if (y > 0.4 && y < 0.8) for (const side of ['armR', 'armL']) if (onArm(ARMS[side], x, y, z, nx, ny, nz)) return side;
   if (y < 0.47) return x < 0.004 ? 'legR' : 'legL';
   return 'torso';
 }
@@ -86,7 +95,7 @@ function ties(a, b, y) {
 
 // Cuts leave ragged openings. Shave off the slivers along their edges, then zip each opening shut,
 // so a freed limb or the back of the calf reads as carved, not broken.
-function closeOpenings(tris, pos, fill) {
+function closeOpenings(tris, pos, fill, part) {
   const key = (a, b) => (a < b ? a * 65536 + b : b * 65536 + a);
   const count = (list) => {
     const m = new Map();
@@ -117,8 +126,23 @@ function closeOpenings(tris, pos, fill) {
     let cur = back.get(start);
     while (cur !== undefined && cur !== start && !seen.has(cur) && loop.length < 1500) { loop.push(cur); seen.add(cur); cur = back.get(cur); }
     if (cur !== start || loop.length < 3) continue;
+    // an opening that runs along two parts (an arm and the flank it hung against) is closed part by part, so no
+    // patch ties them together; only the short gaps where the parts meet are bridged
+    const turns = part ? loop.map((v, i) => part(v) !== part(loop[(i + 1) % loop.length])) : [];
+    const first = turns.indexOf(true);
+    if (first < 0) { close(loop); continue; }
+    const ring = [...loop.slice(first + 1), ...loop.slice(0, first + 1)]; // starts where a part begins
+    const runs = [];
+    for (const v of ring) { if (!runs.length || part(runs[runs.length - 1][0]) !== part(v)) runs.push([]); runs[runs.length - 1].push(v); }
+    for (const run of runs) if (run.length >= 3) close(run.slice());
+    const gaps = runs.flatMap((run) => (run.length >= 3 ? [run[0], run[run.length - 1]] : run));
+    if (gaps.length >= 3) close(gaps);
+  }
+  return { tris, own };
+
+  function close(loop) {
     const custom = fill && fill(loop);
-    if (custom) { own.push({ ...custom, loop, from: tris.length / 3, to: tris.length / 3 + custom.tris.length / 3 }); tris.push(...custom.tris); continue; }
+    if (custom) { own.push({ ...custom, loop, from: tris.length / 3, to: tris.length / 3 + custom.tris.length / 3 }); tris.push(...custom.tris); return; }
     // zip it shut: always clip the corner whose closing edge is shortest, so long narrow openings close
     // across their width and the patch bends with the limb around it
     const d2 = (u, v) => (pos[u * 3] - pos[v * 3]) ** 2 + (pos[u * 3 + 1] - pos[v * 3 + 1]) ** 2 + (pos[u * 3 + 2] - pos[v * 3 + 2]) ** 2;
@@ -135,7 +159,6 @@ function closeOpenings(tris, pos, fill) {
     }
     tris.push(loop[0], loop[1], loop[2]);
   }
-  return { tris, own };
 }
 
 // Around the right thigh: polar coordinates about its axis (a straight line fitted through the leg's centres from
@@ -480,7 +503,7 @@ export function buildStatue({ body, head }) {
   const idx = src.index.array;
   src.computeVertexNormals();
   const N = src.attributes.normal;
-  const cls = Array.from({ length: P.count }, (_, i) => classify(P.getX(i), P.getY(i), P.getZ(i), N.getX(i)));
+  const cls = Array.from({ length: P.count }, (_, i) => classify(P.getX(i), P.getY(i), P.getZ(i), N.getX(i), N.getY(i), N.getZ(i)));
   const radius = thighRadius(P, cls);
   const keep = [];
   const c = new THREE.Vector3();
@@ -510,13 +533,23 @@ export function buildStatue({ body, head }) {
     const flat = (v) => unroll(posList, v), tris = earClip(loop, loop.map(flat));
     return tris && { tris, flat, thigh: true };
   };
-  const { tris: closedTris, own } = closeOpenings(solid, posList, fill);
+  // only an arm is told apart from what it hung against; elsewhere (between the thighs) one patch closes best
+  const { tris: closedTris, own } = closeOpenings(solid, posList, fill, (v) => (cls[v] === 'armR' || cls[v] === 'armL' ? cls[v] : 'body'));
   const closed = rebuildOpenings(closedTris, own, posList, cls, radius);
+  // the Doryphoros' own head never shows (David's sits there), so its triangles go; until now they only vanished
+  // because its weights came out NaN. Then only the vertices a triangle still uses go on: the plinth, strut and bridges
+  // leave thousands behind, some of them NaN after the fairing (a NaN bounding sphere and a console error otherwise)
+  const body3 = [];
+  for (let t = 0; t < closed.length; t += 3) if (cls[closed[t]] !== 'head' && cls[closed[t + 1]] !== 'head' && cls[closed[t + 2]] !== 'head') body3.push(closed[t], closed[t + 1], closed[t + 2]);
+  const used = new Uint8Array(cls.length);
+  for (const v of body3) used[v] = 1;
+  const remap = new Int32Array(cls.length), region = [], kept = [];
+  for (let v = 0; v < cls.length; v++) if (used[v]) { remap[v] = region.length; region.push(cls[v]); kept.push(posList[3 * v], posList[3 * v + 1], posList[3 * v + 2]); }
   const geo = new THREE.BufferGeometry();
-  const pos = new Float32Array(posList);
+  const pos = new Float32Array(kept);
   for (let i = 1; i < pos.length; i += 3) pos[i] -= FLOOR;
   geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-  geo.setIndex(closed);
+  geo.setIndex(body3.map((v) => remap[v]));
   geo.computeVertexNormals();
 
   // ---- the skeleton, bones axis-aligned at rest
@@ -563,7 +596,7 @@ export function buildStatue({ body, head }) {
   for (let i = 0; i < n; i++) {
     p.fromBufferAttribute(geo.attributes.position, i);
     const x = p.x, y = p.y + FLOOR; // region tests in scan heights
-    const part = cls[i];
+    const part = region[i];
     let cands;
     if (part === 'head') cands = ['hide'];
     else if (part === 'armR') cands = y > 0.72 ? ['spine', 'shR', 'elR', 'wrR'] : ['shR', 'elR', 'wrR'];
@@ -572,8 +605,6 @@ export function buildStatue({ body, head }) {
     else if (part === 'legL') cands = y > 0.42 ? ['pelvis', 'hipL', 'knL', 'anL'] : ['hipL', 'knL', 'anL'];
     else {
       cands = ['pelvis', 'spine', 'neck'];
-      if (y > 0.7 && x < -0.06) cands.push('shR');
-      if (y > 0.7 && x > 0.06) cands.push('shL');
       if (y < 0.54) cands.push(x < 0 ? 'hipR' : 'hipL');
     }
     const falloff = part === 'torso' ? 4 : 6; // the torso bends over a wider band at the shoulders and hips
@@ -582,7 +613,38 @@ export function buildStatue({ body, head }) {
       return [name, 1 / Math.pow(segDist(p, a, b) + 0.006, falloff)];
     }).sort((u, v) => v[1] - u[1]).slice(0, 2);
     const sum = scored.reduce((s, q) => s + q[1], 0);
-    scored.forEach(([name, w], k) => { skinIndex[i * 4 + k] = index[name]; skinWeight[i * 4 + k] = w / sum; });
+    let ws = scored.map(([name, w]) => [name, w / sum]);
+    // the torso follows a shoulder only over the top of it (deltoid, collarbone), never down the flank: so a raised
+    // arm opens the armpit instead of dragging the side of the chest along
+    if (part === 'torso') {
+      const share = 0.8 * THREE.MathUtils.smoothstep(y, 0.735, 0.8) * THREE.MathUtils.smoothstep(Math.abs(x), 0.07, 0.115);
+      if (share > 0.01) ws = [[ws[0][0], 1 - share], [x < 0 ? 'shR' : 'shL', share]];
+    }
+    ws.forEach(([name, w], k) => { skinIndex[i * 4 + k] = index[name]; skinWeight[i * 4 + k] = w; });
+  }
+  // the armpits: the chest and back blend into the arm over a few rings of the mesh round each shoulder, so a raised
+  // arm stretches the skin there evenly instead of pulling one row of triangles into a web or a ridge
+  const nbr = Array.from({ length: n }, () => []);
+  const ix = geo.index.array;
+  for (let t = 0; t < ix.length; t += 3) for (const [a, b] of [[ix[t], ix[t + 1]], [ix[t + 1], ix[t + 2]], [ix[t + 2], ix[t]]]) { nbr[a].push(b); nbr[b].push(a); }
+  for (const side of ['R', 'L']) {
+    const joint = V(J['sh' + side]);
+    const arm = new Set(['sh', 'el', 'wr'].map((b) => index[b + side]));
+    const share = new Float32Array(n);
+    for (let i = 0; i < n; i++) for (let k = 0; k < 4; k++) if (arm.has(skinIndex[i * 4 + k])) share[i] += skinWeight[i * 4 + k];
+    const zone = []; // the chest, back and top of the shoulder round the joint; the arm, deltoid and all, moves whole
+    for (let i = 0; i < n; i++) if (region[i] === 'torso' && p.fromBufferAttribute(geo.attributes.position, i).distanceTo(joint) < 0.075) zone.push(i);
+    for (let it = 0; it < 16; it++) {
+      const next = zone.map((i) => { let s = 0; for (const q of nbr[i]) s += share[q]; return 0.5 * share[i] + (0.5 * s) / (nbr[i].length || 1); });
+      zone.forEach((i, k) => { share[i] = next[k]; });
+    }
+    for (const i of zone) {
+      const s = THREE.MathUtils.clamp(share[i], 0, 1);
+      let armBone = index['sh' + side], best = -1;
+      for (let k = 0; k < 4; k++) if (arm.has(skinIndex[i * 4 + k]) && skinWeight[i * 4 + k] > best) { best = skinWeight[i * 4 + k]; armBone = skinIndex[i * 4 + k]; }
+      skinIndex.set([armBone, index.spine, 0, 0], i * 4);
+      skinWeight.set([s, 1 - s, 0, 0], i * 4);
+    }
   }
   geo.setAttribute('skinIndex', new THREE.Uint16BufferAttribute(skinIndex, 4));
   geo.setAttribute('skinWeight', new THREE.Float32BufferAttribute(skinWeight, 4));

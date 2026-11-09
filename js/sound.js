@@ -210,7 +210,28 @@ export function shatter() {
   for (let i = 0; i < 3; i++) setTimeout(() => chime(scale[Math.floor(Math.random() * scale.length)]), i * 45);
 }
 
-// a bullet landing: a ringing knock on steel, a dull crack in stone
+// sliding, on the floor or down a wall: a loop of filtered noise that swells while it lasts (level 0 to 1)
+let scraper = null;
+export function scrape(level) {
+  if (!ac) return;
+  if (!scraper) {
+    if (!enabled || level <= 0) return;
+    const src = noise();
+    src.loop = true;
+    const f = ac.createBiquadFilter();
+    f.type = 'bandpass'; f.frequency.value = 2600; f.Q.value = 0.9;
+    const g = ac.createGain();
+    g.gain.value = 0;
+    src.connect(f).connect(g).connect(master);
+    src.start();
+    scraper = { g, f };
+  }
+  const v = enabled ? level : 0;
+  scraper.g.gain.setTargetAtTime(v * 0.09, ac.currentTime, 0.06);
+  scraper.f.frequency.setTargetAtTime(2200 + v * 900, ac.currentTime, 0.1);
+}
+
+// a bullet landing: a ringing knock on steel, a little crack in the glass wall
 export function impact(kind) {
   if (!enabled || !ac) return;
   if (kind === 'steel') {
@@ -227,6 +248,17 @@ export function impact(kind) {
     o.start(t);
     o.stop(t + 0.32);
   } else {
-    burstOf('lowpass', 900, 0.7, 0.4, 0.14);
+    burstOf('highpass', 4200, 0.8, 0.28, 0.09);
+    const t = ac.currentTime; // a short glassy ping, short enough not to pile up under a burst of fire
+    const o = ac.createOscillator();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(3200 + Math.random() * 900, t);
+    const g = ac.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.05, t + 0.003);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
+    o.connect(g).connect(master);
+    o.start(t);
+    o.stop(t + 0.2);
   }
 }
